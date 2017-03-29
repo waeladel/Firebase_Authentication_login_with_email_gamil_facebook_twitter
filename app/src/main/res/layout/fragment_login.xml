@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent"
+    android:orientation="vertical"
+    tools:context="com.getin.car.fragments.LoginFragment">
+
+    <EditText
+        android:id="@+id/email_address_editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@color/colorWhite"
+        android:ems="10"
+        android:hint="@string/email_address_editText_hint"
+        android:inputType="textEmailAddress"
+        android:maxLines="1"
+        android:padding="@dimen/fab_margin" />
+
+
+
+
+</LinearLayout>
