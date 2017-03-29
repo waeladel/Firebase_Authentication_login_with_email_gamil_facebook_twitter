@@ -202,7 +202,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     }*/
                     Intent mIntent = new Intent(MainActivity.this, ProfileActivity.class);
                     //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(mIntent);
+                    finish();
 
                 } else {
                     // User is signed out

@@ -55,7 +55,9 @@ public class ProfileActivity extends BaseActivity {
                     //  Removing Fragments if Exists and their back stacks
                     Intent mIntent = new Intent(ProfileActivity.this, MainActivity.class);
                     //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(mIntent);
+                    finish();
                 }
                 // ...
             }
