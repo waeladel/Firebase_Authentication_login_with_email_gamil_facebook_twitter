@@ -29,25 +29,41 @@ import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.List;
 import java.util.concurrent.Executor;
 
 
-public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener {
+public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener  {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    private EditText EmailField;
-    private EditText PasswordField;
-    private Button LoginButton;
-    private Button RegisterButton;
+    private EditText mEmailField;
+    private EditText mPasswordField;
+    private Button mLoginButton;
+    private Button mRegisterButton;
+
+    //google sign in buttons and variables
+    private SignInButton mGoogleButton;
+    private static final int RC_SIGN_IN = 9001; //for google sing in
+    private GoogleApiClient mGoogleApiClient;
+
+
     private String mEmail;
     private String mPassword;
 
@@ -68,17 +84,17 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
 
-        EmailField  = (EditText) findViewById(R.id.email_address_editText);
-        EmailField.addTextChangedListener(new TextWatcher() {
+        mEmailField  = (EditText) findViewById(R.id.email_address_editText);
+        mEmailField.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
                 Log.d(TAG, "Editable email= "+ editable.toString());
                 String EditableEmail = editable.toString().trim();
                 if(TextUtils.isEmpty(EditableEmail)){
-                    EmailField.setError(getResources().getString(R.string.required));
+                    mEmailField.setError(getResources().getString(R.string.required));
                 }else if(!TextUtils.isEmpty(EditableEmail)&& !FirebaseUtils.isValidEmail(EditableEmail)){
-                    EmailField.setError(getResources().getString(R.string.email_is_not_valid));
+                    mEmailField.setError(getResources().getString(R.string.email_is_not_valid));
                 }
             }
             @Override
@@ -92,17 +108,17 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         });
 
 
-        PasswordField = (EditText) findViewById(R.id.password_editText);
-        PasswordField.addTextChangedListener(new TextWatcher() {
+        mPasswordField = (EditText) findViewById(R.id.password_editText);
+        mPasswordField.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void afterTextChanged(Editable editable) {
                 Log.d(TAG, "Editable password= "+ editable.toString());
                 String EditablePassword = editable.toString().trim();
                 if(TextUtils.isEmpty(EditablePassword)){
-                    PasswordField.setError(getResources().getString(R.string.required));
+                    mPasswordField.setError(getResources().getString(R.string.required));
                 }else if(!TextUtils.isEmpty(EditablePassword)&& !FirebaseUtils.isValidPassword(EditablePassword)){
-                    PasswordField.setError(getResources().getString(R.string.password_must_be_six));
+                    mPasswordField.setError(getResources().getString(R.string.password_must_be_six));
                 }
             }
             @Override
@@ -115,25 +131,24 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
             }
         });
 
-        LoginButton = (Button) findViewById(R.id.Login_btn);
-        RegisterButton = (Button) findViewById(R.id.create_account_btn);
+        mLoginButton = (Button) findViewById(R.id.Login_btn);
+        mRegisterButton = (Button) findViewById(R.id.create_account_btn);
+        mGoogleButton = (SignInButton) findViewById(R.id.google_btn);
 
-        mProgress = new ProgressDialog(this);
-
-        LoginButton.setOnClickListener(new View.OnClickListener() {
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //onButtonPressed("LoginClicked");
                 SignInWithEmail();
-                Log.d(TAG, "LoginButton clicked ");
+                Log.d(TAG, "mLoginButton clicked ");
             }
         });
 
-        RegisterButton.setOnClickListener(new View.OnClickListener() {
+        mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //onButtonPressed("RegisterClicked");
-                Log.d(TAG, "RegisterButton clicked ");
+                Log.d(TAG, "mRegisterButton clicked ");
                 //create fragment with Register Fragment
                 mRegisterFragment  = new RegisterFragment();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
@@ -141,6 +156,15 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 RegisterTransaction.add(R.id.content_main, mRegisterFragment,"mRegisterFragment");
                 RegisterTransaction.addToBackStack("RegisterClicked");
                 RegisterTransaction.commit();
+            }
+        });
+
+        mGoogleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //onButtonPressed("mGoogleClicked");
+                googleSignIn();
+                Log.d(TAG, "mGoogleButton clicked ");
             }
         });
 
@@ -194,6 +218,29 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
             }
         };
 
+        // [START config_signin]
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        Log.d(TAG, "gso requestIdToken ="+ getString(R.string.default_web_client_id));
+        // [END config_signin]
+
+        // [START google Clint]
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener(){
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(MainActivity.this, R.string.auth_failed,
+                                Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "mGoogleApiClient onConnectionFailed");
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        // [END google Clint]
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -240,10 +287,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     @Override
     public void onStop() {
         super.onStop();
+        Log.d(TAG, "MainActivity onStop");
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
-            Log.d(TAG, "MainActivity onStop");
-
         }
     }
 
@@ -275,10 +321,10 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 break;
         }
     }
-
+    // Sing in method using email and password
     private void SignInWithEmail() {
-        mEmail = EmailField.getText().toString().trim();
-        mPassword = PasswordField.getText().toString().trim();
+        mEmail = mEmailField.getText().toString().trim();
+        mPassword = mPasswordField.getText().toString().trim();
 
         if(FirebaseUtils.isValidEmail(mEmail) && FirebaseUtils.isValidPassword(mPassword)){
             Log.d(TAG, "Both are not empty");
@@ -311,6 +357,63 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     Toast.LENGTH_SHORT).show();
         }
     }
+
+    // Google sing in methods
+    // Intent to open activity enables user to select one of his google accoints
+    private void googleSignIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+        Log.d(TAG, "signInIntent Activity started");
+    }
+
+    // Activity result after user selects the account he wants to use
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            mProgress.setMessage(getResources().getString(R.string.signing_in_progress));
+            mProgress.show();
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
+                Log.d(TAG, "Google Sign In was successful lets Auth");
+            } else {
+                // Google Sign In failed, update UI appropriately
+                mProgress.hide();
+                Toast.makeText(MainActivity.this, R.string.auth_failed,
+                        Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Google Sign In failed");
+            }
+        }
+    }
+
+    //After Successfully login we need to authenticate the user with firebase to trigger the listener
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(MainActivity.this, R.string.auth_failed,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        mProgress.hide();
+                    }
+                });
+    }
+
 
 
 }

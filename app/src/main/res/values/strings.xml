@@ -23,7 +23,7 @@
     <string name="required">Required</string>
     <string name="password_must_be_six">Password must be at least 6 characters</string>
     <string name="email_is_not_valid">A valid email is required</string>
-    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_profile">Profile</string>
 
 
 </resources>
