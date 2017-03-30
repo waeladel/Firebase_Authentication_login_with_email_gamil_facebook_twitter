@@ -52,9 +52,19 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.TwitterAuthProvider;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+
+import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener  {
@@ -76,6 +86,8 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     private CallbackManager mCallbackManager;
     private static final int FACEBOOK_SIGN_IN_RC = 9002; //for google sing in
 
+    //Twitter button
+    private TwitterLoginButton mTwitterButton;
 
     private String mEmail;
     private String mPassword;
@@ -88,6 +100,14 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Configure Twitter SDK
+        TwitterAuthConfig authConfig =  new TwitterAuthConfig(
+                getString(R.string.twitter_consumer_key),
+                getString(R.string.twitter_consumer_secret));
+        Fabric.with(this, new Twitter(authConfig));
+
+        // Inflate layout (must be done after Twitter is configured)
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -95,7 +115,6 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
 
         mEmailField  = (EditText) findViewById(R.id.email_address_editText);
         mEmailField.addTextChangedListener(new TextWatcher() {
@@ -288,6 +307,41 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         });
         // [END initialize_fblogin]
 
+
+
+
+        // [START initialize_twitter_login]
+        mTwitterButton = (TwitterLoginButton) findViewById(R.id.twitter_btn);
+        mTwitterButton.setCallback(new Callback<TwitterSession>() {
+            @Override
+            public void success(Result<TwitterSession> result) {
+                Log.d(TAG, "twitterLogin:success" + result);
+                handleTwitterSession(result.data);
+
+                //Requesting a user’s emai but app must be whitelisted by Twitter first
+                /*TwitterAuthClient authClient = new TwitterAuthClient();
+                authClient.requestEmail(result.data, new Callback<String>() {
+                    @Override
+                    public void success(Result<String> result) {
+                        // Do something with the result, which provides the email address
+                        Log.w(TAG, "email address="+ result);
+                    }
+                    @Override
+                    public void failure(TwitterException exception) {
+                        // Do something on failure
+                        Log.w(TAG, "faild to get email");
+                    }
+                });*/
+            }
+
+            @Override
+            public void failure(TwitterException exception) {
+                Log.w(TAG, "twitterLogin:failure", exception);
+                //updateUI(null);
+            }
+        });
+        // [END initialize_twitter_login]
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -427,28 +481,40 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "requestCode ="+ requestCode);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == GOOGLE_SIGN_IN_RC) {
-            mProgress.setMessage(getResources().getString(R.string.signing_in_progress));
-            mProgress.show();
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-                Log.d(TAG, "Google Sign In was successful lets Auth");
-            } else {
-                // Google Sign In failed, update UI appropriately
-                mProgress.dismiss();
-                Toast.makeText(MainActivity.this, R.string.auth_failed,
-                        Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Google Sign In failed");
-            }
-        }else{
-            Log.d(TAG, "Facebook requestCode= " + requestCode);
-            // Pass the activity result back to the Facebook SDK
-            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case GOOGLE_SIGN_IN_RC:
+                // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+                mProgress.setMessage(getResources().getString(R.string.signing_in_progress));
+                mProgress.show();
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                if (result.isSuccess()) {
+                    // Google Sign In was successful, authenticate with Firebase
+                    GoogleSignInAccount account = result.getSignInAccount();
+                    firebaseAuthWithGoogle(account);
+                    Log.d(TAG, "Google Sign In was successful lets Auth");
+                } else {
+                    // Google Sign In failed, update UI appropriately
+                    mProgress.dismiss();
+                    Toast.makeText(MainActivity.this, R.string.auth_failed,
+                            Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Google Sign In failed");
+                }
+                break;
+            case 64206: //facebook
+                Log.d(TAG, "Facebook requestCode= " + requestCode);
+                // Pass the activity result back to the Facebook SDK
+                mCallbackManager.onActivityResult(requestCode, resultCode, data);
+                break;
+            case 140:  //twitter
+                // Pass the activity result to the Twitter login button.
+                mTwitterButton.onActivityResult(requestCode, resultCode, data);
+                break;
+            default: //do twitter again just in case
+                // Pass the activity result to the Twitter login button.
+                mTwitterButton.onActivityResult(requestCode, resultCode, data);
+                break;
         }
     }
 
@@ -501,5 +567,41 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     }
                 });
     }
+
+    // [START auth_with_twitter]
+    private void handleTwitterSession(TwitterSession session) {
+        Log.d(TAG, "handleTwitterSession:" + session);
+        // [START_EXCLUDE silent]
+        mProgress.setMessage(getResources().getString(R.string.signing_in_progress));
+        mProgress.show();
+        // [END_EXCLUDE]
+
+        AuthCredential credential = TwitterAuthProvider.getCredential(
+                session.getAuthToken().token,
+                session.getAuthToken().secret);
+
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        // [START_EXCLUDE]
+                        mProgress.dismiss();
+                        // [END_EXCLUDE]
+                    }
+                });
+    }
+    // [END auth_with_twitter]
+
+
 
 }

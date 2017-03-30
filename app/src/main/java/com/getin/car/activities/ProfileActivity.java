@@ -17,6 +17,7 @@ import com.facebook.login.LoginManager;
 import com.getin.car.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.twitter.sdk.android.Twitter;
 
 public class ProfileActivity extends BaseActivity {
 
@@ -85,8 +86,9 @@ public class ProfileActivity extends BaseActivity {
                 break;
             case R.id.action_log_out:
                 Log.d(TAG, "MenuItem = 1");
-                FirebaseAuth.getInstance().signOut();
+                FirebaseAuth.getInstance().signOut(); // logout firebase user
                 LoginManager.getInstance().logOut();// logout from facebook too
+                Twitter.logOut(); // logout from twitter too
                 break;
         }
 
