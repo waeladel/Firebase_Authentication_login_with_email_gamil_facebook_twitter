@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.facebook.login.LoginManager;
 import com.getin.car.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -85,6 +86,7 @@ public class ProfileActivity extends BaseActivity {
             case R.id.action_log_out:
                 Log.d(TAG, "MenuItem = 1");
                 FirebaseAuth.getInstance().signOut();
+                LoginManager.getInstance().logOut();// logout from facebook too
                 break;
         }
 

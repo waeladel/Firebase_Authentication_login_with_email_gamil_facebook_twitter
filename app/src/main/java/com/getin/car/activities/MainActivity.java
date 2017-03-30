@@ -24,6 +24,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.getin.car.App;
 import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
@@ -41,6 +48,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -60,8 +68,13 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
     //google sign in buttons and variables
     private SignInButton mGoogleButton;
-    private static final int RC_SIGN_IN = 9001; //for google sing in
+    private static final int GOOGLE_SIGN_IN_RC = 9001; //for google sing in
     private GoogleApiClient mGoogleApiClient;
+
+    //facebook button and managers
+    private LoginButton mFacebookButton;
+    private CallbackManager mCallbackManager;
+    private static final int FACEBOOK_SIGN_IN_RC = 9002; //for google sing in
 
 
     private String mEmail;
@@ -243,6 +256,38 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 .build();
         // [END google Clint]
 
+        // [START initialize_fblogin]
+        // Initialize Facebook Login button
+        mCallbackManager = CallbackManager.Factory.create();
+        mFacebookButton = (LoginButton) findViewById(R.id.facebook_btn);
+        mFacebookButton.setReadPermissions("email", "public_profile");
+        mFacebookButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "facebook:onCancel");
+                // [START_EXCLUDE]
+                //updateUI(null);
+                // [END_EXCLUDE]
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "facebook:onError", error);
+                // [START_EXCLUDE]
+                //updateUI(null);
+                Toast.makeText(MainActivity.this, R.string.auth_failed,
+                        Toast.LENGTH_SHORT).show();
+                // [END_EXCLUDE]
+            }
+        });
+        // [END initialize_fblogin]
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -296,6 +341,16 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     }
 
     @Override
+    public void onPause () {
+        super.onPause ();
+        Log.d(TAG, "MainActivity onPause");
+        if (mProgress != null){
+            mProgress.dismiss();
+            Log.d(TAG, "hide mProgress onPause MainActivity");
+        }
+    }
+
+    @Override
     public void onFragmentInteraction(String FragmentName) {// listens to login fragments buttons
         Log.d(TAG, "FragmentName = "+ FragmentName);
 
@@ -338,7 +393,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-                            mProgress.hide();
+                            mProgress.dismiss();
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
@@ -364,7 +419,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     // Intent to open activity enables user to select one of his google accoints
     private void googleSignIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_RC);
         Log.d(TAG, "signInIntent Activity started");
     }
 
@@ -374,7 +429,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         super.onActivityResult(requestCode, resultCode, data);
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == GOOGLE_SIGN_IN_RC) {
             mProgress.setMessage(getResources().getString(R.string.signing_in_progress));
             mProgress.show();
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
@@ -385,11 +440,15 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 Log.d(TAG, "Google Sign In was successful lets Auth");
             } else {
                 // Google Sign In failed, update UI appropriately
-                mProgress.hide();
+                mProgress.dismiss();
                 Toast.makeText(MainActivity.this, R.string.auth_failed,
                         Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Google Sign In failed");
             }
+        }else{
+            Log.d(TAG, "Facebook requestCode= " + requestCode);
+            // Pass the activity result back to the Facebook SDK
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -403,6 +462,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                        mProgress.dismiss();
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
@@ -411,11 +471,35 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                             Toast.makeText(MainActivity.this, R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
                         }
-                        mProgress.hide();
+
                     }
                 });
     }
 
 
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token);
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(MainActivity.this, R.string.auth_failed,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+    }
 
 }
