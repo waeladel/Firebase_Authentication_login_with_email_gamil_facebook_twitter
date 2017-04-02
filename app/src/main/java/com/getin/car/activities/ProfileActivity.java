@@ -15,6 +15,9 @@ import android.view.View;
 
 import com.facebook.login.LoginManager;
 import com.getin.car.R;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.twitter.sdk.android.Twitter;
@@ -23,8 +26,10 @@ public class ProfileActivity extends BaseActivity {
 
     private final static String TAG = ProfileActivity.class.getSimpleName();
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    //initialize the FirebaseAuth instance
+    private static FirebaseAuth mAuth;
+    private static FirebaseAuth.AuthStateListener mAuthListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +94,15 @@ public class ProfileActivity extends BaseActivity {
                 FirebaseAuth.getInstance().signOut(); // logout firebase user
                 LoginManager.getInstance().logOut();// logout from facebook too
                 Twitter.logOut(); // logout from twitter too
+                // Google sign out
+               /*Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(@NonNull Status status) {
+                                //updateUI(null);
+                                Log.d(TAG, "Google sign out succeeded");
+                            }
+                        });*/
                 break;
         }
 

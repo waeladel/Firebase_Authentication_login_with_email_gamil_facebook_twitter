@@ -78,13 +78,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
     //google sign in buttons and variables
     private SignInButton mGoogleButton;
-    private static final int GOOGLE_SIGN_IN_RC = 9001; //for google sing in
-    private GoogleApiClient mGoogleApiClient;
 
     //facebook button and managers
     private LoginButton mFacebookButton;
-    private CallbackManager mCallbackManager;
-    private static final int FACEBOOK_SIGN_IN_RC = 9002; //for google sing in
 
     //Twitter button
     private TwitterLoginButton mTwitterButton;
@@ -92,10 +88,10 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     private String mEmail;
     private String mPassword;
 
-    public FirebaseAnalytics mFirebaseAnalytics;
     //initialize the FirebaseAuth instance
     public static FirebaseAuth mAuth;
     public static FirebaseAuth.AuthStateListener mAuthListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,9 +108,6 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         mEmailField  = (EditText) findViewById(R.id.email_address_editText);
         mEmailField.addTextChangedListener(new TextWatcher() {
@@ -252,28 +245,6 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
             }
         };
 
-        // [START config_signin]
-        // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        Log.d(TAG, "gso requestIdToken ="+ getString(R.string.default_web_client_id));
-        // [END config_signin]
-
-        // [START google Clint]
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener(){
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText(MainActivity.this, R.string.auth_failed,
-                                Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "mGoogleApiClient onConnectionFailed");
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        // [END google Clint]
 
         // [START initialize_fblogin]
         // Initialize Facebook Login button
@@ -308,8 +279,6 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         // [END initialize_fblogin]
 
 
-
-
         // [START initialize_twitter_login]
         mTwitterButton = (TwitterLoginButton) findViewById(R.id.twitter_btn);
         mTwitterButton.setCallback(new Callback<TwitterSession>() {
@@ -337,7 +306,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
             @Override
             public void failure(TwitterException exception) {
                 Log.w(TAG, "twitterLogin:failure", exception);
-                //updateUI(null);
+                //updateUI;
+                Toast.makeText(MainActivity.this, R.string.auth_failed,
+                        Toast.LENGTH_SHORT).show();
             }
         });
         // [END initialize_twitter_login]
@@ -591,7 +562,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Toast.makeText(MainActivity.this, R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
                         }
                         // [START_EXCLUDE]
