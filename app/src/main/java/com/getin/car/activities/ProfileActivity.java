@@ -95,14 +95,14 @@ public class ProfileActivity extends BaseActivity {
                 LoginManager.getInstance().logOut();// logout from facebook too
                 Twitter.logOut(); // logout from twitter too
                 // Google sign out
-               /*Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+               Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                         new ResultCallback<Status>() {
                             @Override
                             public void onResult(@NonNull Status status) {
                                 //updateUI(null);
                                 Log.d(TAG, "Google sign out succeeded");
                             }
-                        });*/
+                        });
                 break;
         }
 
