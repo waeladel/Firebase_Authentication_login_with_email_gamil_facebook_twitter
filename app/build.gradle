@@ -33,13 +33,19 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
 
     // Firebase core for analytics
-    compile 'com.google.firebase:firebase-core:10.0.1'
+    compile 'com.google.firebase:firebase-core:10.2.1'
+
+    // Firebase database
+    compile 'com.google.firebase:firebase-database:10.2.1'
+
+    // FirebaseUI Database only
+    compile 'com.firebaseui:firebase-ui-database:1.2.0'
 
     // Firebase Authentication
-    compile 'com.google.firebase:firebase-auth:10.0.1'
+    compile 'com.google.firebase:firebase-auth:10.2.1'
 
     // Google Sign In SDK (only required for Google Sign In)
-    compile 'com.google.android.gms:play-services-auth:10.0.1'
+    compile 'com.google.android.gms:play-services-auth:10.2.1'
 
     // Facebook Android SDK (only required for Facebook Login)
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
