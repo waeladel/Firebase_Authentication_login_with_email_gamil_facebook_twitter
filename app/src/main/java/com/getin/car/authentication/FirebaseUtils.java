@@ -56,4 +56,13 @@ abstract public class FirebaseUtils {
         }
     }
 
+    public static boolean isValidName(CharSequence name) {
+
+        if (TextUtils.isEmpty(name)){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }

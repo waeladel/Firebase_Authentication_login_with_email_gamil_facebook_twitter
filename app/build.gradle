@@ -31,34 +31,26 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
-
-    // Firebase core for analytics
-    compile 'com.google.firebase:firebase-core:10.2.1'
-
-    // Firebase database
-    compile 'com.google.firebase:firebase-database:10.2.1'
-
-    // FirebaseUI Database only
-    compile 'com.firebaseui:firebase-ui-database:1.2.0'
-
-    // Firebase Authentication
-    compile 'com.google.firebase:firebase-auth:10.2.1'
-
-    // Google Sign In SDK (only required for Google Sign In)
-    compile 'com.google.android.gms:play-services-auth:10.2.1'
-
-    // Facebook Android SDK (only required for Facebook Login)
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
-
-    // Twitter Android SDK (only required for Twitter Login)
-    compile('com.twitter.sdk.android:twitter-core:1.6.6@aar') {
+    compile 'com.google.firebase:firebase-core:10.2.1' // Firebase core for analytics
+    compile 'com.google.firebase:firebase-database:10.2.1' // Firebase database
+    compile 'com.google.firebase:firebase-storage:10.2.1'  // Firebase storage
+    compile 'com.firebaseui:firebase-ui-database:1.2.0' // FirebaseUI Database only
+    compile 'com.firebaseui:firebase-ui-storage:1.2.0'  // FirebaseUI Storage only
+    compile 'com.google.firebase:firebase-auth:10.2.1' // Firebase Authentication
+    compile 'com.google.android.gms:play-services-auth:10.2.1' // Google Sign In SDK (Google Sign In)
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)' // Facebook Android SDK (for Facebook Login)
+    compile('com.twitter.sdk.android:twitter-core:1.6.6@aar') { // Twitter Android SDK (for Twitter Login)
         transitive = true
     }
     compile('com.twitter.sdk.android:twitter:1.13.1@aar') {
         transitive = true;
     }
     testCompile 'junit:junit:4.12'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.3.+' // Image Cropper
+    compile 'com.github.bumptech.glide:glide:3.7.0' // glide for image display
 }
+
+
 
 
 

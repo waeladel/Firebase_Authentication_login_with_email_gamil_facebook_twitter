@@ -17,6 +17,7 @@ import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
 import com.facebook.login.widget.LoginButton;
 import com.getin.car.R;
+import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
 import com.google.android.gms.auth.api.Auth;
@@ -27,6 +28,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 
@@ -48,6 +53,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     RegisterFragment mRegisterFragment;
     LoginFragment mLoginFragment;
+    EditProfileFragment EditProfileFrag;
     //List<Fragment> fragmentsList;
 
     public ProgressDialog mProgress;
@@ -62,6 +68,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     //initialize the Firebase Analytics
     public FirebaseAnalytics mFirebaseAnalytics;
 
+    //initialize the Firebase Database
+    public FirebaseDatabase database;
+
+    //initialize the Firebase UsersReference
+    public DatabaseReference UsersRef;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +87,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        // Obtain the FirebaseDatabase instance.
+        database = FirebaseDatabase.getInstance();
+        UsersRef = database.getReference().child("users");
 
         // [START config_signin]
         // Configure Google Sign In

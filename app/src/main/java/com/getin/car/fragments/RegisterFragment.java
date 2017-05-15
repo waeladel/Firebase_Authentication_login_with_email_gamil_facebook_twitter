@@ -140,9 +140,9 @@ public class RegisterFragment extends Fragment {
     }
 
     //  Rename method, update argument and hook method into UI event
-    public void onButtonPressed(String FragmentName) {
+    public void onButtonPressed(String fragmentName) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(FragmentName);
+            mListener.onFragmentInteraction(fragmentName);
         }
     }
 
@@ -195,7 +195,7 @@ public class RegisterFragment extends Fragment {
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
                                 Toast.makeText(getActivity(), R.string.register_failed,
-                                        Toast.LENGTH_SHORT).show();
+                                        Toast.LENGTH_LONG).show();
                             }else{
                                 Log.d(TAG, "RegisterWithEmail:succeeded");
                             }
@@ -204,7 +204,7 @@ public class RegisterFragment extends Fragment {
         }else{
             Log.d(TAG, "Both are empty");
             Toast.makeText(getActivity(), R.string.empty_email_password,
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 

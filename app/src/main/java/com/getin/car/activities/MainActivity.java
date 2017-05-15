@@ -344,6 +344,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 }
                 Intent mIntent = new Intent(MainActivity.this, ProfileActivity.class);
                 //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                mIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(mIntent);
             }
         });
@@ -436,7 +437,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         }else{
             Log.d(TAG, "Both are empty");
             Toast.makeText(MainActivity.this, R.string.empty_email_password,
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 
