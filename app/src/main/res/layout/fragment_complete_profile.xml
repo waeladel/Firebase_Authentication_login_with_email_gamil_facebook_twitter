@@ -5,15 +5,15 @@
     android:layout_height="match_parent"
     android:background="@color/dgts__purple"
     android:clickable="true"
-    tools:context="com.getin.car.fragments.EditProfileFragment">
+    tools:context="com.getin.car.fragments.CompleteProfileFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
 
-    <ImageButton
+    <ImageView
         android:id="@+id/profile_image_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="0dp"
@@ -30,7 +30,6 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
         android:background="@color/colorWhite"
         android:ems="10"
         android:hint="@string/name_editText_hint"
@@ -39,7 +38,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image_btn" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/take_image_btn" />
 
     <EditText
         android:id="@+id/edit_email_editText"
@@ -70,4 +70,26 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <ImageButton
+        android:id="@+id/take_image_btn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintLeft_toLeftOf="@+id/profile_image_btn"
+        app:layout_constraintTop_toBottomOf="@+id/profile_image_btn"
+        app:srcCompat="@mipmap/ic_photo_camera_white_48dp" />
+
+    <ImageButton
+        android:id="@+id/select_image_btn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintRight_toRightOf="@+id/profile_image_btn"
+        app:layout_constraintTop_toBottomOf="@+id/profile_image_btn"
+        app:srcCompat="@mipmap/ic_image_white_48dp" />
 </android.support.constraint.ConstraintLayout>

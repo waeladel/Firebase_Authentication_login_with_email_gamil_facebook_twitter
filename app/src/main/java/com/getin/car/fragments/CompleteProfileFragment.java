@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -17,41 +18,34 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.getin.car.R;
-import com.getin.car.activities.MainActivity;
-import com.getin.car.activities.ProfileActivity;
 import com.getin.car.authentication.FirebaseUtils;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link EditProfileFragment.OnFragmentInteractionListener} interface
+ * {@link CompleteProfileFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link EditProfileFragment#newInstance} factory method to
+ * Use the {@link CompleteProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class EditProfileFragment extends Fragment {
+public class CompleteProfileFragment extends Fragment {
 
-    private static String TAG = EditProfileFragment.class.getSimpleName();
+    private static String TAG = CompleteProfileFragment.class.getSimpleName();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -74,10 +68,15 @@ public class EditProfileFragment extends Fragment {
     private EditText mNameField;
     private EditText mEmailField;
     private Button mSubmitButton;
-    private ImageButton mProfileImageButton;
+    private ImageView mProfileImageButton;
+    private ImageButton mCameraSelectButton;
+    private ImageButton mGallerySelectButton;
+
+
     private static Uri sPhotoResultUri;
 
     private static final int SELECT_PICTURE = 3;
+    private static final int REQUEST_IMAGE_CAPTURE = 4;
 
     /*//initialize the FirebaseAuth instance
     private FirebaseAuth mAuth;
@@ -98,12 +97,12 @@ public class EditProfileFragment extends Fragment {
 
     private ProgressDialog mProgress;
 
-    public EditProfileFragment() {
+    public CompleteProfileFragment() {
         // Required empty public constructor
     }
 
-    public static EditProfileFragment newInstance(String userId, String displayName,String email, Uri photoUrl, Boolean isEmailVerified) {
-        EditProfileFragment fragment = new EditProfileFragment();
+    public static CompleteProfileFragment newInstance(String userId, String displayName, String email, Uri photoUrl, Boolean isEmailVerified) {
+        CompleteProfileFragment fragment = new CompleteProfileFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM_USERID, userId);
         args.putString(ARG_PARAM_DISPLAYNAME, displayName);
@@ -138,7 +137,7 @@ public class EditProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View fragView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
+        View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
         mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
         if(mParamDisplayName != null){
@@ -201,7 +200,8 @@ public class EditProfileFragment extends Fragment {
             }
         });
 
-        mProfileImageButton = (ImageButton)fragView.findViewById(R.id.profile_image_btn);
+        mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
+        mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
 
         Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
 
@@ -214,7 +214,7 @@ public class EditProfileFragment extends Fragment {
             Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
         }
 
-        mProfileImageButton.setOnClickListener(new View.OnClickListener() {
+        mGallerySelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "mProfileImageButton clicked ");
@@ -222,6 +222,20 @@ public class EditProfileFragment extends Fragment {
                 galleryIntent.setType("image/*");
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(galleryIntent, SELECT_PICTURE);
+            }
+        });
+
+        mCameraSelectButton = (ImageButton)fragView.findViewById(R.id.take_image_btn);
+
+        mCameraSelectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "mCameraSelectButton clicked ");
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                }
+
             }
         });
 
@@ -299,6 +313,25 @@ public class EditProfileFragment extends Fragment {
 
         switch (requestCode){
             case SELECT_PICTURE:
+                Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
+                Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
+                if (resultCode == RESULT_OK) {
+                    Uri imageUri = data.getData();
+                    CropImage.activity(imageUri)
+                            //.setGuidelines(CropImageView.Guidelines.ON)
+                            .setAspectRatio(1,1)
+                            //.setMaxCropResultSize(600, 600)
+                            .setMinCropResultSize(300,300)
+                            .setRequestedSize(300,300) //resize
+                            .start(getContext(), this);
+                } else {
+                    //Exception error = result.getError();
+                    Toast.makeText(getActivity(), R.string.error,
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+            case REQUEST_IMAGE_CAPTURE:
                 Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
                 Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
                 if (resultCode == RESULT_OK) {

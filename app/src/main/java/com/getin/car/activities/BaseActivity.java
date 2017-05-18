@@ -1,43 +1,25 @@
 package com.getin.car.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
-import com.facebook.internal.Utility;
-import com.facebook.internal.Validate;
-import com.facebook.login.widget.LoginButton;
 import com.getin.car.R;
-import com.getin.car.fragments.EditProfileFragment;
+import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.twitter.sdk.android.Twitter;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-
-import java.util.List;
-
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Created on 28/03/2017.
@@ -53,7 +35,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     RegisterFragment mRegisterFragment;
     LoginFragment mLoginFragment;
-    EditProfileFragment EditProfileFrag;
+    CompleteProfileFragment EditProfileFrag;
     //List<Fragment> fragmentsList;
 
     public ProgressDialog mProgress;
