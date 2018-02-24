@@ -26,8 +26,11 @@ import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -38,30 +41,22 @@ import static android.app.Activity.RESULT_OK;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CompleteProfileFragment.OnFragmentInteractionListener} interface
+ * {@link EditProfileFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link CompleteProfileFragment#newInstance} factory method to
+ * Use the {@link EditProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CompleteProfileFragment extends Fragment {
+public class EditProfileFragment extends Fragment {
 
-    private static String TAG = CompleteProfileFragment.class.getSimpleName();
+    private static String TAG = EditProfileFragment.class.getSimpleName();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM_USERID = "userId";
-    private static final String ARG_PARAM_DISPLAYNAME = "displayName";
-    private static final String ARG_PARAM_EMAIL = "email";
-    private static final String ARG_PARAM_PHOTOURL = "photoUrl";
-    private static final String ARG_PARAM_ISVERIFIED = "isEmailVerified";
 
 
     // TODO: Rename and change types of parameters
     private String mParamUserId ;
-    private String mParamDisplayName;
-    private String mParamEmail;
-    private Uri mParamPhotoUrl;
-    private Boolean mParamIsEmailVerified;
 
     private OnFragmentInteractionListener mListener;
 
@@ -75,11 +70,13 @@ public class CompleteProfileFragment extends Fragment {
 
     private static Uri sPhotoResultUri;
 
-    private static String sname;
-    private static String sEmail;
-
     private static final int SELECT_PICTURE = 3;
     private static final int REQUEST_IMAGE_CAPTURE = 4;
+
+    private static String sname;
+    private static String sEmail;
+    private static String sAvatarUrl;
+
 
     /*//initialize the FirebaseAuth instance
     private FirebaseAuth mAuth;
@@ -92,7 +89,7 @@ public class CompleteProfileFragment extends Fragment {
     private FirebaseDatabase mDatabase;
 
     //initialize the Firebase UsersReference
-    private DatabaseReference mUsersRef;
+    private DatabaseReference mCurrentUsersRef;
 
     /*private String mName;
     private String mEmail;
@@ -100,20 +97,14 @@ public class CompleteProfileFragment extends Fragment {
 
     private ProgressDialog mProgress;
 
-    public CompleteProfileFragment() {
+    public EditProfileFragment() {
         // Required empty public constructor
     }
 
-    public static CompleteProfileFragment newInstance(String userId, String displayName, String email, Uri photoUrl, Boolean isEmailVerified) {
-        CompleteProfileFragment fragment = new CompleteProfileFragment();
+    public static EditProfileFragment newInstance(String userId) {
+        EditProfileFragment fragment = new EditProfileFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM_USERID, userId);
-        args.putString(ARG_PARAM_DISPLAYNAME, displayName);
-        args.putString(ARG_PARAM_EMAIL, email);
-        if (photoUrl != null){
-            args.putString(ARG_PARAM_PHOTOURL, photoUrl.toString());
-        }
-        args.putBoolean(ARG_PARAM_ISVERIFIED, isEmailVerified);
         fragment.setArguments(args);
         return fragment;
     }
@@ -123,21 +114,8 @@ public class CompleteProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParamUserId = getArguments().getString(ARG_PARAM_USERID);
-            mParamDisplayName = getArguments().getString(ARG_PARAM_DISPLAYNAME);
-            mParamEmail = getArguments().getString(ARG_PARAM_EMAIL);
-            if (getArguments().getString(ARG_PARAM_PHOTOURL) != null){
-                mParamPhotoUrl = Uri.parse(getArguments().getString(ARG_PARAM_PHOTOURL));
-            }
-            mParamIsEmailVerified = getArguments().getBoolean(ARG_PARAM_ISVERIFIED);
-
             Log.d(TAG, "mParamUserId= "+ mParamUserId);
-            Log.d(TAG, "mParamDisplayName= "+ mParamDisplayName);
-            Log.d(TAG, "mParamEmail= "+ mParamEmail);
-            Log.d(TAG, "mParamPhotoUrl= "+ mParamPhotoUrl);
-            Log.d(TAG, "mParamIsEmailVerified= "+ mParamIsEmailVerified);
-
         }
-
     }
 
     @Override
@@ -146,9 +124,33 @@ public class CompleteProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
+        // Obtain the FirebaseDatabase instance.
+        mDatabase = FirebaseDatabase.getInstance();
+        mCurrentUsersRef = mDatabase.getReference().child("users").child(mParamUserId);
+
+        // Read from the database just once
+        Log.d(TAG, "userId Value is: " + mParamUserId);
+        mCurrentUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value.
+                Log.d(TAG, "dataSnapshot = " + dataSnapshot);
+                sname = dataSnapshot.child("name").getValue(String.class);
+                sEmail = dataSnapshot.child("email").getValue(String.class);
+                sAvatarUrl = dataSnapshot.child("avatar").getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+
+
         mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
-        if(mParamDisplayName != null){
-            mNameField.setText(mParamDisplayName);
+        if(sname != null){
+            mNameField.setText(sname);
         }
         mNameField.addTextChangedListener(new TextWatcher() {
 
@@ -162,7 +164,7 @@ public class CompleteProfileFragment extends Fragment {
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // other stuffs
+                // other stuff
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -171,8 +173,8 @@ public class CompleteProfileFragment extends Fragment {
         });
 
         mEmailField = (EditText)fragView.findViewById(R.id.edit_email_editText);
-        if(mParamEmail != null){
-            mEmailField.setText(mParamEmail);
+        if(sEmail != null){
+            mEmailField.setText(sEmail);
         }
 
         mEmailField.addTextChangedListener(new TextWatcher() {
@@ -212,11 +214,11 @@ public class CompleteProfileFragment extends Fragment {
 
         Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
 
-        if (mParamPhotoUrl != null && sPhotoResultUri == null){
-            Glide.with(this).load(mParamPhotoUrl).into(mProfileImageButton);
-            Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +mParamPhotoUrl);
+        if (sAvatarUrl != null && sPhotoResultUri == null){
+            Glide.with(this).load(sAvatarUrl).into(mProfileImageButton);
+            Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +sAvatarUrl);
         }
-        else if( mParamPhotoUrl == null && sPhotoResultUri != null){
+        else if( sAvatarUrl == null && sPhotoResultUri != null){
             mProfileImageButton.setImageURI(sPhotoResultUri);
             Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
         }
@@ -248,10 +250,6 @@ public class CompleteProfileFragment extends Fragment {
 
         // Obtain the FirebaseStorage instance.
         mStorageRef = FirebaseStorage.getInstance().getReference();
-
-        // Obtain the FirebaseDatabase instance.
-        mDatabase = FirebaseDatabase.getInstance();
-        mUsersRef = mDatabase.getReference().child("users");
 
         mProgress = new ProgressDialog(this.getActivity());
 
@@ -386,12 +384,13 @@ public class CompleteProfileFragment extends Fragment {
             mProgress.setMessage(this.getActivity().getString(R.string.submitting_in_progress));
             mProgress.show();
 
-            mUsersRef.child(mParamUserId).child("name").setValue(sname);
-            mUsersRef.child(mParamUserId).child("email").setValue(sEmail);
+            mCurrentUsersRef.child("name").setValue(sname);
+            mCurrentUsersRef.child("email").setValue(sEmail);
             if(sPhotoResultUri != null){
                 uploadAvatar();
             }else{
-                mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+                mCurrentUsersRef.child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+                mProgress.dismiss();
             }
 
 
@@ -402,7 +401,7 @@ public class CompleteProfileFragment extends Fragment {
             Toast.makeText(getActivity(), R.string.empty_email_name,
                     Toast.LENGTH_LONG).show();
         }
-
+        mProgress.dismiss();
     }
 
     private void uploadAvatar() {
@@ -422,7 +421,7 @@ public class CompleteProfileFragment extends Fragment {
                         // Get a URL to the uploaded content
                         @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         if(downloadUrl != null){
-                            mUsersRef.child(mParamUserId).child("avatar").setValue(downloadUrl.toString());
+                            mCurrentUsersRef.child("avatar").setValue(downloadUrl.toString());
                         }
                         mProgress.dismiss();
 

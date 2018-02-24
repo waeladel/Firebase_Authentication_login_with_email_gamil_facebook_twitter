@@ -16,6 +16,7 @@ import android.view.View;
 import com.facebook.login.LoginManager;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
+import com.getin.car.fragments.EditProfileFragment;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -52,12 +53,12 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                EditProfileFrag  = new CompleteProfileFragment();
+                completeProfileFrag  = new CompleteProfileFragment();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
-                FragmentTransaction EditTransaction =fragmentManager.beginTransaction();
-                EditTransaction.add(R.id.content_profile, EditProfileFrag,"EditProfileFrag");
-                //EditTransaction.addToBackStack("EditProfileClicked");
-                EditTransaction.commit();
+                FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
+                completeTransaction.add(R.id.content_profile, completeProfileFrag,"CompleteProfileFrag");
+                //completeTransaction.addToBackStack("CompleteProfileClicked");
+                completeTransaction.commit();
             }
         });
 
@@ -109,8 +110,17 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
             case R.id.action_settings:
                 Log.d(TAG, "MenuItem = 0");
                 break;
-            case R.id.action_log_out:
+            case R.id.action_edit_profile:
                 Log.d(TAG, "MenuItem = 1");
+                editProfileFragment  = EditProfileFragment.newInstance(userId);//new EditProfileFrag();
+                //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
+                FragmentTransaction editTransaction =fragmentManager.beginTransaction();
+                editTransaction.add(R.id.content_profile, editProfileFragment,"editProfileFrag");
+                //editTransaction.addToBackStack("editProfileFrag");
+                editTransaction.commit();
+                break;
+            case R.id.action_log_out:
+                Log.d(TAG, "MenuItem = 2");
                 FirebaseAuth.getInstance().signOut(); // logout firebase user
                 LoginManager.getInstance().logOut();// logout from facebook too
                 Twitter.logOut(); // logout from twitter too
@@ -191,14 +201,14 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 }else{
                     Log.d(TAG, "User dose not exist");
                     //Replace current fragment with Register Fragment
-                    Log.d(TAG, "EditProfileFrag = "+EditProfileFrag+ fragmentManager.findFragmentByTag("EditProfileFrag"));
-                    if(fragmentManager.findFragmentByTag("EditProfileFrag") == null){
-                        EditProfileFrag  = EditProfileFrag.newInstance(userId, displayName, email, photoUrl,isEmailVerified);//new CompleteProfileFragment();
+                    Log.d(TAG, "completeProfileFrag = "+completeProfileFrag+ fragmentManager.findFragmentByTag("completeProfileFrag"));
+                    if(fragmentManager.findFragmentByTag("completeProfileFrag") == null){
+                        completeProfileFrag  = completeProfileFrag.newInstance(userId, displayName, email, photoUrl,isEmailVerified);//new CompleteProfileFragment();
                         //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
-                        FragmentTransaction EditTransaction =fragmentManager.beginTransaction();
-                        EditTransaction.add(R.id.content_profile, EditProfileFrag,"EditProfileFrag");
-                        //EditTransaction.addToBackStack("EditProfileClicked");
-                        EditTransaction.commit();
+                        FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
+                        completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
+                        //completeTransaction.addToBackStack("completeProfileClicked");
+                        completeTransaction.commit();
                     }
                 }
             }

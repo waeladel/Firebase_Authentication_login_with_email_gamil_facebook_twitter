@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.facebook.CallbackManager;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
+import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
 import com.google.android.gms.auth.api.Auth;
@@ -33,9 +34,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     public FragmentManager fragmentManager;
     //public android.support.v4.app.FragmentTransaction fragmentTransaction;
 
-    RegisterFragment mRegisterFragment;
-    LoginFragment mLoginFragment;
-    CompleteProfileFragment EditProfileFrag;
+    public RegisterFragment mRegisterFragment;
+    public LoginFragment mLoginFragment;
+    public CompleteProfileFragment completeProfileFrag;
+    public EditProfileFragment editProfileFragment;
     //List<Fragment> fragmentsList;
 
     public ProgressDialog mProgress;
