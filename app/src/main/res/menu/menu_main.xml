@@ -15,8 +15,14 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_log_out"
+        android:id="@+id/action_menu_invite"
         android:orderInCategory="3"
+        android:title="@string/menu_invite"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_log_out"
+        android:orderInCategory="4"
         android:title="@string/action_log_out"
         app:showAsAction="never" />
 </menu>

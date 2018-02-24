@@ -119,8 +119,11 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 //editTransaction.addToBackStack("editProfileFrag");
                 editTransaction.commit();
                 break;
+            case R.id.action_menu_invite:
+                Log.d(TAG, "MenuItem = 2  INVITE clicked ");
+                break;
             case R.id.action_log_out:
-                Log.d(TAG, "MenuItem = 2");
+                Log.d(TAG, "MenuItem = 3");
                 FirebaseAuth.getInstance().signOut(); // logout firebase user
                 LoginManager.getInstance().logOut();// logout from facebook too
                 Twitter.logOut(); // logout from twitter too
