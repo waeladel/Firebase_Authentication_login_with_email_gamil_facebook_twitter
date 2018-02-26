@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
-        applicationId "com.getin.car"
+        applicationId "com.parchut.car"
         minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
@@ -38,6 +38,7 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-database:3.2.1' // FirebaseUI Database only
     compile 'com.firebaseui:firebase-ui-storage:3.2.1'  // FirebaseUI Storage only
     compile 'com.google.firebase:firebase-auth:11.8.0' // Firebase Authentication
+    compile 'com.google.firebase:firebase-invites:11.8.0' // Firebase invite
     compile 'com.google.android.gms:play-services-auth:11.8.0' // Google Sign In SDK (Google Sign In)
     compile 'com.facebook.android:facebook-android-sdk:4.26.0' // Facebook Android SDK (for Facebook Login)
     compile('com.twitter.sdk.android:twitter-core:1.6.6@aar') { // Twitter Android SDK (for Twitter Login)

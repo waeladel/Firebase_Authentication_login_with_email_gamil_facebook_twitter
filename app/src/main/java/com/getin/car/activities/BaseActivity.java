@@ -14,6 +14,7 @@ import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
+import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -87,6 +88,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // [START google Clint]
         mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(AppInvite.API)
                 .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener(){
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

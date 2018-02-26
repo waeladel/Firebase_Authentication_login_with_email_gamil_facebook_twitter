@@ -36,6 +36,9 @@ import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -43,6 +46,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -67,7 +71,7 @@ import java.util.concurrent.Executor;
 import io.fabric.sdk.android.Fabric;
 
 
-public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener  {
+public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener,GoogleApiClient.OnConnectionFailedListener  {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -96,7 +100,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d(TAG, "MainActivity onCreate");
         // Configure Twitter SDK
         TwitterAuthConfig authConfig =  new TwitterAuthConfig(
                 getString(R.string.twitter_consumer_key),
@@ -105,6 +109,44 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
         // Inflate layout (must be done after Twitter is configured)
         setContentView(R.layout.activity_main);
+
+        // Create an auto-managed GoogleApiClient with access to App Invites. got it from baseActivity
+      /*  mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(AppInvite.API)
+                .enableAutoManage(this, this)
+                .build();*/
+
+        // Check for App Invite invitations and launch deep-link activity if possible.
+        // Requires that an Activity is registered in AndroidManifest.xml to handle
+        // deep-link URLs.
+        //boolean autoLaunchDeepLink = true;
+        boolean autoLaunchDeepLink = false;
+        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
+                .setResultCallback(
+                        new ResultCallback<AppInviteInvitationResult>() {
+                            @Override
+                            public void onResult(AppInviteInvitationResult result) {
+                                Log.d(TAG, "getInvitation:onResult:" + result.getStatus());
+                                if (result.getStatus().isSuccess()) {
+                                    // Extract information from the intent
+                                    Intent intent = result.getInvitationIntent();
+                                    String deepLink = AppInviteReferral.getDeepLink(intent);
+                                    String invitationId = AppInviteReferral.getInvitationId(intent);
+                                    Log.d(TAG, "getInvitation:deepLink:" + deepLink);
+                                    Log.d(TAG, "getInvitation:invitationId:" + invitationId);
+
+                                    // Because autoLaunchDeepLink = true we don't have to do anything
+                                    // here, but we could set that to false and manually choose
+                                    // an Activity to launch to handle the deep link here.
+                                    // ...
+                                    /*Intent congratulationIntent = new Intent(ActivityAlarmClock.this, DeepLinkActivity.class);
+                                    //startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(congratulationIntent);*/
+                                    Toast.makeText(MainActivity.this, getString(R.string.deep_link_congratulation),
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -349,6 +391,16 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
             }
         });
     }
+    // [END on_create]
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(TAG, "onConnectionFailed:" + connectionResult);
+        //showMessage(getString(R.string.google_play_services_error));
+        Toast.makeText(MainActivity.this, getString(R.string.google_play_services_error),
+                Toast.LENGTH_LONG).show();
+        // Sending failed or it was canceled
+    }
+
 
     @Override
     public void onStart() {
@@ -483,6 +535,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 // Pass the activity result to the Twitter login button.
                 mTwitterButton.onActivityResult(requestCode, resultCode, data);
                 break;
+
             default: //do twitter again just in case
                 // Pass the activity result to the Twitter login button.
                 mTwitterButton.onActivityResult(requestCode, resultCode, data);

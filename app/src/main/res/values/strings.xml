@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Getin</string>
+    <string name="app_name">Parchut</string>
     <string name="Login">Login</string>
 
     <!-- menu items -->
@@ -35,10 +35,30 @@
     <string name="twitter_consumer_key">zBUOm8rwVU0C0Jt5hsVICL34S</string>
     <string name="twitter_consumer_secret">oPxbLoDfldOxpS0e6LrT2wBh2rmbcLJePFlD9ASkgLNTnX1Q3H</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!-- invite -->
     <string name="menu_invite">Invite Friends</string>
+    <string name="invitation_title">Suggest to friends</string>
+    <string name="invitation_message">Hi! this app is great</string>
+    <string name="invitation_deep_link" translatable="false">https://hrnm2.app.goo.gl/parchut</string>
+    <string name="invitation_custom_image" >https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png</string>
+    <string name="invitation_cta">Install</string>
+    <string name="invitation_failed">Sorry, we couldn\'t sent the invitation to your friends.</string>
+    <string name="google_play_services_error">Connection failed.</string>
+
+    <string name="deep_link_fmt" formatted="false">Deep Link: %s</string>
+    <string name="invitation_id_fmt" formatted="false">Invitation ID: %s</string>
+
+    <string name="deep_link_congratulation">Congratulations! you got invited</string>
+    <string name="deep_link_welcome_text">You may now try the app.</string>
+
+    <string name="sent_invitations_fmt" formatted="false">Sent %d invitations</string>
+    <string name="send_failed">Sending invitations failed</string>
+    <string name="invite_dialog_title">You got an invitation!</string>
+    <string name="deep_link_default">Deep link not set</string>
+    <string name="invitation_id_default">Invitation ID not set</string>
+    <!-- invite -->
 
 </resources>

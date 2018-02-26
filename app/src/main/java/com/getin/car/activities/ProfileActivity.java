@@ -12,11 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -30,6 +32,7 @@ import com.twitter.sdk.android.Twitter;
 public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener{
 
     private final static String TAG = ProfileActivity.class.getSimpleName();
+    private static final int REQUEST_INVITE = 13;
 
     //initialize the FirebaseAuth instance
     private static FirebaseAuth mAuth;
@@ -41,6 +44,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "ProfileActivity onCreate");
         Log.d(TAG, "savedInstanceState:" + savedInstanceState);
         setContentView(R.layout.activity_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -121,6 +125,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 break;
             case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 2  INVITE clicked ");
+                onInviteClicked();
                 break;
             case R.id.action_log_out:
                 Log.d(TAG, "MenuItem = 3");
@@ -145,6 +150,38 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
         }*/
         return super.onOptionsItemSelected(item);
     }
+
+    private void onInviteClicked() {
+        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                .setMessage(getString(R.string.invitation_message))
+                .setDeepLink(Uri.parse(getString(R.string.invitation_deep_link)))
+                //.setCustomImage(Uri.parse(getString(R.string.invitation_custom_image)))
+                .setCallToActionText(getString(R.string.invitation_cta))
+                .build();
+        startActivityForResult(intent, REQUEST_INVITE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+
+        if (requestCode == REQUEST_INVITE) {
+            if (resultCode == RESULT_OK) {
+                // Get the invitation IDs of all sent messages
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                for (String id : ids) {
+                    Log.d(TAG, "onActivityResult: sent invitation " + id);
+                }
+            } else {
+                Toast.makeText(ProfileActivity.this, getString(R.string.invitation_failed),
+                        Toast.LENGTH_LONG).show();
+                // Sending failed or it was canceled, show failure message to the user
+                // ...
+            }
+        }
+    }
+    // [END on_activity_result]
 
     @Override
     public void onStart() {
