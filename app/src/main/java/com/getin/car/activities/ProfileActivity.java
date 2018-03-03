@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
+import com.firebase.ui.auth.AuthUI;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
@@ -22,12 +23,14 @@ import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.twitter.sdk.android.Twitter;
+//import com.twitter.sdk.android.Twitter;
 
 public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener{
 
@@ -128,8 +131,15 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 onInviteClicked();
                 break;
             case R.id.action_log_out:
-                Log.d(TAG, "MenuItem = 3");
-                FirebaseAuth.getInstance().signOut(); // logout firebase user
+
+                AuthUI.getInstance()
+                        .signOut(this)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Log.d(TAG, "MenuItem = 3");
+                            }
+                        });
+                /*FirebaseAuth.getInstance().signOut(); // logout firebase user
                 LoginManager.getInstance().logOut();// logout from facebook too
                 Twitter.logOut(); // logout from twitter too
                 // Google sign out
@@ -140,7 +150,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                                 //updateUI(null);
                                 Log.d(TAG, "Google sign out succeeded");
                             }
-                        });
+                        });*/
                 break;
         }
 

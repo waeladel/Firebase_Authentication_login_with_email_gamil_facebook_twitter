@@ -11,7 +11,7 @@
 
 
 
-        <EditText
+        <!--<EditText
             android:id="@+id/email_address_editText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -129,7 +129,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/facebook_btn" />
-
+-->
 
 </android.support.constraint.ConstraintLayout>
 

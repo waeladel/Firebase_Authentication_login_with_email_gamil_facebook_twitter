@@ -102,7 +102,7 @@ public class LoginFragment extends Fragment {
         });
 
 
-        PasswordField = (EditText)fragView.findViewById(R.id.password_editText);
+       /* PasswordField = (EditText)fragView.findViewById(R.id.password_editText);
         PasswordField.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -127,7 +127,7 @@ public class LoginFragment extends Fragment {
 
         LoginButton = (Button)fragView.findViewById(R.id.Login_btn);
         RegisterButton = (Button)fragView.findViewById(R.id.create_account_btn);
-
+*/
         mProgress = new ProgressDialog(this.getActivity());
 
         LoginButton.setOnClickListener(new View.OnClickListener() {

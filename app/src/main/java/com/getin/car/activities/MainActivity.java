@@ -31,6 +31,8 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.IdpResponse;
 import com.getin.car.App;
 import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
@@ -57,7 +59,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
-import com.twitter.sdk.android.Twitter;
+//import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
@@ -65,32 +67,35 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import io.fabric.sdk.android.Fabric;
+//import io.fabric.sdk.android.Fabric;
 
 
 public class MainActivity extends BaseActivity implements LoginFragment.OnFragmentInteractionListener,GoogleApiClient.OnConnectionFailedListener  {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
-    private EditText mEmailField;
+    private static final int RC_SIGN_IN = 123;
+
+    /*private EditText mEmailField;
     private EditText mPasswordField;
     private Button mLoginButton;
-    private Button mRegisterButton;
+    private Button mRegisterButton;*/
 
     //google sign in buttons and variables
-    private SignInButton mGoogleButton;
+    //private SignInButton mGoogleButton;
 
     //facebook button and managers
-    private LoginButton mFacebookButton;
+    //private LoginButton mFacebookButton;
 
     //Twitter button
-    private TwitterLoginButton mTwitterButton;
+    //private TwitterLoginButton mTwitterButton;
 
-    private String mEmail;
-    private String mPassword;
+    /*private String mEmail;
+    private String mPassword;*/
 
     //initialize the FirebaseAuth instance
     public static FirebaseAuth mAuth;
@@ -101,11 +106,12 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "MainActivity onCreate");
+
         // Configure Twitter SDK
-        TwitterAuthConfig authConfig =  new TwitterAuthConfig(
+        /*TwitterAuthConfig authConfig =  new TwitterAuthConfig(
                 getString(R.string.twitter_consumer_key),
                 getString(R.string.twitter_consumer_secret));
-        Fabric.with(this, new Twitter(authConfig));
+        Fabric.with(this, new Twitter(authConfig));*/
 
         // Inflate layout (must be done after Twitter is configured)
         setContentView(R.layout.activity_main);
@@ -151,7 +157,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mEmailField  = (EditText) findViewById(R.id.email_address_editText);
+       /* mEmailField  = (EditText) findViewById(R.id.email_address_editText);
         mEmailField.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -233,7 +239,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 googleSignIn();
                 Log.d(TAG, "mGoogleButton clicked ");
             }
-        });
+        });*/
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -282,6 +288,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     LoginTransaction.add(R.id.content_main, mLoginFragment,"mLoginFragment");
                     //LoginTransaction.addToBackStack(null);
                     LoginTransaction.commit();*/
+                    initiateLogin();
                 }
                 // ...
             }
@@ -290,7 +297,8 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
         // [START initialize_fblogin]
         // Initialize Facebook Login button
-        mCallbackManager = CallbackManager.Factory.create();
+
+        /*mCallbackManager = CallbackManager.Factory.create();
         mFacebookButton = (LoginButton) findViewById(R.id.facebook_btn);
         mFacebookButton.setReadPermissions("email", "public_profile");
         mFacebookButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -330,7 +338,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 handleTwitterSession(result.data);
 
                 //Requesting a user’s emai but app must be whitelisted by Twitter first
-                /*TwitterAuthClient authClient = new TwitterAuthClient();
+                *//*TwitterAuthClient authClient = new TwitterAuthClient();
                 authClient.requestEmail(result.data, new Callback<String>() {
                     @Override
                     public void success(Result<String> result) {
@@ -342,7 +350,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                         // Do something on failure
                         Log.w(TAG, "faild to get email");
                     }
-                });*/
+                });*//*
             }
 
             @Override
@@ -352,7 +360,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 Toast.makeText(MainActivity.this, R.string.auth_failed,
                         Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
         // [END initialize_twitter_login]
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -390,7 +398,29 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 startActivity(mIntent);
             }
         });
+
+    }//End of on create
+
+    private void initiateLogin() {
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.TWITTER_PROVIDER).build(),
+                new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()
+
+        );
+        // Create and launch sign-in intent
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        //.setLogo(R.drawable.messenger_bubble_small_white)      // Set logo drawable
+                        .setTheme(R.style.AppTheme_AppBarOverlay)      // Set theme
+                        .build(),
+                RC_SIGN_IN);
     }
+
     // [END on_create]
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -456,8 +486,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 break;
         }
     }
+
     // Sing in method using email and password
-    private void SignInWithEmail() {
+    /*private void SignInWithEmail() {
         mEmail = mEmailField.getText().toString().trim();
         mPassword = mPasswordField.getText().toString().trim();
 
@@ -499,9 +530,29 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN_RC);
         Log.d(TAG, "signInIntent Activity started");
+    }*/
+
+    //Activity result after user selects a provider he wants to use
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            if (resultCode == RESULT_OK) {
+                // Successfully signed in
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                // ...
+            } else {
+                // Sign in failed, check response for error code
+                // ...
+            }
+        }
     }
 
-    // Activity result after user selects the account he wants to use
+
+    /*// Activity result after user selects the account he wants to use
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -541,9 +592,9 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                 mTwitterButton.onActivityResult(requestCode, resultCode, data);
                 break;
         }
-    }
+    }*/
 
-    //After Successfully login we need to authenticate the user with firebase to trigger the listener
+    /*//After Successfully login we need to authenticate the user with firebase to trigger the listener
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
@@ -565,11 +616,11 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
 
                     }
                 });
-    }
+    }*/
 
 
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    /*private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -624,7 +675,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                         // [END_EXCLUDE]
                     }
                 });
-    }
+    }*/
     // [END auth_with_twitter]
 
 

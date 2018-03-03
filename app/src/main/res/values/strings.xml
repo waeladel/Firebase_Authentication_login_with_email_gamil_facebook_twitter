@@ -31,7 +31,8 @@
     <string name="email_is_not_valid">A valid email is required</string>
     <string name="title_activity_profile">Profile</string>
     <string name="fb_login_protocol_scheme">fb1010966069035103</string>
-    <string name="facebook_app_id">1010966069035103</string>
+    <string name="facebook_application_id">1010966069035103</string>
+    <!--<string name="facebook_app_id">1010966069035103</string>-->
     <string name="twitter_consumer_key">zBUOm8rwVU0C0Jt5hsVICL34S</string>
     <string name="twitter_consumer_secret">oPxbLoDfldOxpS0e6LrT2wBh2rmbcLJePFlD9ASkgLNTnX1Q3H</string>
 
