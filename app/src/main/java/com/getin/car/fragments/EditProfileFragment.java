@@ -234,20 +234,6 @@ public class EditProfileFragment extends Fragment {
             }
         });
 
-        mCameraSelectButton = (ImageButton)fragView.findViewById(R.id.take_image_btn);
-
-        mCameraSelectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "mCameraSelectButton clicked ");
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
-
-            }
-        });
-
         // Obtain the FirebaseStorage instance.
         mStorageRef = FirebaseStorage.getInstance().getReference();
 

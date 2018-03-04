@@ -35,7 +35,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
+import com.yanzhenjie.album.Action;
+import com.yanzhenjie.album.Album;
+import com.yanzhenjie.album.AlbumFile;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +57,8 @@ import static android.app.Activity.RESULT_OK;
 public class CompleteProfileFragment extends Fragment {
 
     private static String TAG = CompleteProfileFragment.class.getSimpleName();
+    private static final int SELECT_MULTIMEDIA = 2;
+    private ArrayList<AlbumFile> mMediaFiles;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -75,7 +82,6 @@ public class CompleteProfileFragment extends Fragment {
     private EditText mEmailField;
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
-    private ImageButton mCameraSelectButton;
     private ImageButton mGallerySelectButton;
 
 
@@ -241,27 +247,15 @@ public class CompleteProfileFragment extends Fragment {
         mGallerySelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "mProfileImageButton clicked ");
-                Intent galleryIntent = new Intent();
-                galleryIntent.setType("image/*");
+                Log.d(TAG, "mGallerySelect clicked ");
+                /*Intent galleryIntent = new Intent();
+                galleryIntent.setType("image*//*");
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(galleryIntent, SELECT_PICTURE);
+                startActivityForResult(galleryIntent, SELECT_PICTURE);*/
+                selectMedia();
             }
         });
 
-        mCameraSelectButton = (ImageButton)fragView.findViewById(R.id.take_image_btn);
-
-        mCameraSelectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "mCameraSelectButton clicked ");
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
-
-            }
-        });
 
         // Obtain the FirebaseStorage instance.
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -337,14 +331,17 @@ public class CompleteProfileFragment extends Fragment {
         Log.d(TAG, "requestCode ="+ requestCode);
 
         switch (requestCode){
-            case SELECT_PICTURE:
+            /*case SELECT_PICTURE:
                 Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
                 Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
                 if (resultCode == RESULT_OK) {
                     Uri imageUri = data.getData();
                     CropImage.activity(imageUri)
                             //.setGuidelines(CropImageView.Guidelines.ON)
-                            .setAspectRatio(1,1)
+                            .setAllowRotation(true)
+                            .setAutoZoomEnabled(true)
+                            //.setAspectRatio(1,1)
+                            .setFixAspectRatio(true)
                             //.setMaxCropResultSize(600, 600)
                             .setMinCropResultSize(300,300)
                             .setRequestedSize(300,300) //resize
@@ -355,26 +352,8 @@ public class CompleteProfileFragment extends Fragment {
                             Toast.LENGTH_SHORT).show();
                 }
 
-                break;
-            case REQUEST_IMAGE_CAPTURE:
-                Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
-                Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
-                if (resultCode == RESULT_OK) {
-                    Uri imageUri = data.getData();
-                    CropImage.activity(imageUri)
-                            //.setGuidelines(CropImageView.Guidelines.ON)
-                            .setAspectRatio(1,1)
-                            //.setMaxCropResultSize(600, 600)
-                            .setMinCropResultSize(300,300)
-                            .setRequestedSize(300,300) //resize
-                            .start(getContext(), this);
-                } else {
-                    //Exception error = result.getError();
-                    Toast.makeText(getActivity(), R.string.error,
-                            Toast.LENGTH_SHORT).show();
-                }
+                break;*/
 
-                break;
             case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
                 Log.d(TAG, "CROP_PICTURE ="+ requestCode);
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
@@ -386,8 +365,6 @@ public class CompleteProfileFragment extends Fragment {
                     Toast.makeText(getActivity(), error.toString(),
                             Toast.LENGTH_LONG).show();
                 }
-
-
                 break;
             default:
                 break;
@@ -478,6 +455,52 @@ public class CompleteProfileFragment extends Fragment {
                     }
                 });
     }
+
+    private void selectMedia() {
+        Album.image(this) // Image and video mix options.
+                .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
+                .requestCode(200) // The request code will be returned in the listener.
+                .columnCount(SELECT_MULTIMEDIA) // The number of columns in the page list.
+                //.selectCount(1)  // Choose up to a few images.
+                .camera(true) // Whether the camera appears in the Item.
+                .onResult(new Action<ArrayList<AlbumFile>>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull ArrayList<AlbumFile> result) {
+                        // accept the result.
+                        mMediaFiles = result;
+                        AlbumFile albumFile = mMediaFiles.get(0);
+                        Uri MediaUri = Uri.parse(albumFile.getPath()) ;
+
+                        Log.d(TAG, "MediaType" +albumFile.getMediaType());
+                        Log.d(TAG, "MediaUri" +MediaUri);
+
+                        cropImage(MediaUri);
+                    }
+                })
+                .onCancel(new Action<String>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull String result) {
+                        // The user canceled the operation.
+                    }
+                })
+                .start();
+    }
+
+    private void cropImage(Uri imageUri) {
+        CropImage.activity(Uri.fromFile(new File(imageUri.toString())))
+                //.setGuidelines(CropImageView.Guidelines.ON)
+                .setAllowRotation(true)
+                .setAutoZoomEnabled(true)
+                //.setAspectRatio(1,1)
+                .setFixAspectRatio(true)
+                //.setMaxCropResultSize(600, 600)
+                .setMinCropResultSize(300,300)
+                .setRequestedSize(300,300) //resize
+                .start(getContext(), this);
+        Log.d(TAG, "cropImage starts" +imageUri);
+
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
