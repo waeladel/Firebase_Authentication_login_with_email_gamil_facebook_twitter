@@ -14,15 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.facebook.login.LoginManager;
 import com.firebase.ui.auth.AuthUI;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
 import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +26,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 //import com.twitter.sdk.android.Twitter;
 
 public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener{
@@ -41,8 +39,12 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
     private static FirebaseAuth mAuth;
     private static FirebaseAuth.AuthStateListener mAuthListener;
 
-    public String userId;
-
+    public String currentUserId;
+    public String currentUserName;
+    public String currentUserEmail;
+    public Uri currentUserPhoto;
+    public Boolean currentUserVerified;
+    public boolean userExist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +78,20 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    userId = user.getUid();
+                    currentUserId = user.getUid();
+                    currentUserName = user.getDisplayName();
+                    currentUserEmail = user.getEmail();
+                    currentUserPhoto = user.getPhotoUrl();
+                    currentUserVerified = user.isEmailVerified();
+
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getDisplayName:" + user.getDisplayName());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
                     Log.d(TAG, "onAuthStateChanged:signed_in_emailVerified?:" + user.isEmailVerified());
-                    isUserExist(user.getUid(),user.getDisplayName(),user.getEmail(),user.getPhotoUrl(),user.isEmailVerified());
+                    if(!isUserExist(currentUserId)){
+                        completeProfile(currentUserId, currentUserName, currentUserEmail, currentUserPhoto, currentUserVerified);
+                    }
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -119,7 +128,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 break;
             case R.id.action_edit_profile:
                 Log.d(TAG, "MenuItem = 1");
-                editProfileFragment  = EditProfileFragment.newInstance(userId);//new EditProfileFrag();
+                editProfileFragment  = EditProfileFragment.newInstance(currentUserId);//new EditProfileFrag();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                 FragmentTransaction editTransaction =fragmentManager.beginTransaction();
                 editTransaction.add(R.id.content_profile, editProfileFragment,"editProfileFrag");
@@ -197,6 +206,13 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        Log.d(TAG, "onStart()");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
     }
 
     @Override
@@ -205,6 +221,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+        Log.d(TAG, "onStop()");
     }
 
     @Override
@@ -236,10 +253,33 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
         }
     }
 
-    private void isUserExist(final String userId, final String displayName, final String email, final Uri photoUrl, final Boolean isEmailVerified){
+    private boolean isUserExist(final String userId){
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + userId);
-        UsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DocumentReference UserDoc = db.collection("users").document(userId);
+        UserDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        userExist = true;
+                    } else {
+                        Log.d(TAG, "No such user");
+                        userExist = false;
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    userExist = false;
+                }
+            }
+        });
+
+        Log.d(TAG, "userExist = " +userExist);
+        return userExist;
+
+        /*UsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value.
@@ -248,18 +288,10 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 if(dataSnapshot.hasChild(userId)){
                     Log.d(TAG, "user exist");
                     //Log.d(TAG, "Value is: " + value);
+                    userExist = true;
                 }else{
                     Log.d(TAG, "User dose not exist");
-                    //Replace current fragment with Register Fragment
-                    Log.d(TAG, "completeProfileFrag = "+completeProfileFrag+ fragmentManager.findFragmentByTag("completeProfileFrag"));
-                    if(fragmentManager.findFragmentByTag("completeProfileFrag") == null){
-                        completeProfileFrag  = completeProfileFrag.newInstance(userId, displayName, email, photoUrl,isEmailVerified);//new CompleteProfileFragment();
-                        //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
-                        FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
-                        completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
-                        //completeTransaction.addToBackStack("completeProfileClicked");
-                        completeTransaction.commit();
-                    }
+                    userExist = false;
                 }
             }
 
@@ -268,8 +300,20 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
-        });
+        });*/
     }
 
+    private void completeProfile( String userId, String displayName, String email, Uri photoUrl, Boolean isEmailVerified){
+        //Replace current fragment with Register Fragment
+        Log.d(TAG, "completeProfileFrag = "+completeProfileFrag+ fragmentManager.findFragmentByTag("completeProfileFrag"));
+        if(fragmentManager.findFragmentByTag("completeProfileFrag") == null){
+            completeProfileFrag  = completeProfileFrag.newInstance(userId, displayName, email, photoUrl,isEmailVerified);//new CompleteProfileFragment();
+            //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
+            FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
+            completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
+            //completeTransaction.addToBackStack("completeProfileClicked");
+            completeTransaction.commit();
+        }
 
+    }
 }

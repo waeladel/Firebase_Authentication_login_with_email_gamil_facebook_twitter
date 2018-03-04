@@ -22,6 +22,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * Created on 28/03/2017.
@@ -54,12 +57,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     public FirebaseAnalytics mFirebaseAnalytics;
 
     //initialize the Firebase Database
-    public FirebaseDatabase database;
+    //public FirebaseDatabase database;
+    public FirebaseFirestore db;
 
     //initialize the Firebase UsersReference
-    public DatabaseReference UsersRef;
-
-
+    //public DatabaseReference UsersRef;
+    //DocumentReference UserDocRef ;
+    CollectionReference usersColRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,16 +78,19 @@ public abstract class BaseActivity extends AppCompatActivity {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Obtain the FirebaseDatabase instance.
-        database = FirebaseDatabase.getInstance();
-        UsersRef = database.getReference().child("users");
+        /*database = FirebaseDatabase.getInstance();
+        UsersRef = database.getReference().child("users");*/
+        db =  FirebaseFirestore.getInstance();
+        usersColRef = db.collection("users");
+
 
         // [START config_signin]
         // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        /*GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-        Log.d(TAG, "gso requestIdToken ="+ getString(R.string.default_web_client_id));
+        Log.d(TAG, "gso requestIdToken ="+ getString(R.string.default_web_client_id));*/
         // [END config_signin]
 
         // [START google Clint]
@@ -97,10 +104,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                         Log.d(TAG, "mGoogleApiClient onConnectionFailed");
                     }
                 })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+//                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         // [END google Clint]
-
 
     }
 
