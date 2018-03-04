@@ -212,6 +212,9 @@ public class CompleteProfileFragment extends Fragment {
             public void onClick(View view) {
                 //onButtonPressed("submitProfileClicked");
                 Log.d(TAG, "mSubmitButton clicked ");
+                mProgress.setMessage(getActivity().getString(R.string.submitting_in_progress));
+                mProgress.show();
+
                 if(sPhotoResultUri != null ){
                     uploadAvatar();
                 }else{
@@ -398,8 +401,6 @@ public class CompleteProfileFragment extends Fragment {
         Log.d(TAG, "CROP_PICTURE_sPhotoResultUri ="+ sPhotoResultUri);
 
         if(FirebaseUtils.isValidEmail(sEmail) && FirebaseUtils.isValidName(sname)){
-            mProgress.setMessage(this.getActivity().getString(R.string.submitting_in_progress));
-            mProgress.show();
 
             Map<String, Object> user = new HashMap<>();
             /*mUsersRef.child(mParamUserId).child("name").setValue(sname);
@@ -438,6 +439,8 @@ public class CompleteProfileFragment extends Fragment {
                     Toast.LENGTH_LONG).show();
         }
 
+        mProgress.dismiss();
+
     }
 
     private void uploadAvatar() {
@@ -465,8 +468,6 @@ public class CompleteProfileFragment extends Fragment {
                         /*if(downloadUrl != null){
                             mUsersRef.child(mParamUserId).child("avatar").setValue(downloadUrl.toString());
                         }*/
-                        mProgress.dismiss();
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -474,7 +475,6 @@ public class CompleteProfileFragment extends Fragment {
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful uploads
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
-                        mProgress.dismiss();
                     }
                 });
     }
