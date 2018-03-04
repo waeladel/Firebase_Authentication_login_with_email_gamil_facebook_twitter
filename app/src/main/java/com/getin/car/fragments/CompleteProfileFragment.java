@@ -212,7 +212,7 @@ public class CompleteProfileFragment extends Fragment {
             public void onClick(View view) {
                 //onButtonPressed("submitProfileClicked");
                 Log.d(TAG, "mSubmitButton clicked ");
-                if(sPhotoResultUri != null || mParamPhotoUrl != null ){
+                if(sPhotoResultUri != null ){
                     uploadAvatar();
                 }else{
                     submitProfile(null);
@@ -409,6 +409,8 @@ public class CompleteProfileFragment extends Fragment {
             if(downloadUri != null){
                 //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
                 user.put("avatar", downloadUri.toString());
+            }else if(mParamPhotoUrl != null){
+                user.put("avatar", mParamPhotoUrl.toString());
             }else{
                 //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
                 user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
@@ -445,7 +447,13 @@ public class CompleteProfileFragment extends Fragment {
                 .child(mParamUserId)
                 //.child(sPhotoResultUri.getLastPathSegment());
                 .child(sname);
-        avatarRef.putFile(sPhotoResultUri)
+        Uri storageUploadUri; // to determine wither to upload sPhotoResultUri or mParamPhotoUrl
+        if(sPhotoResultUri != null){
+            storageUploadUri = sPhotoResultUri;
+        }else{
+            return;
+        }
+        avatarRef.putFile(storageUploadUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
