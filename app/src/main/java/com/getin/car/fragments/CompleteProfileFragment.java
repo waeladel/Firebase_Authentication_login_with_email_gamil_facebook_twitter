@@ -26,12 +26,18 @@ import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -89,10 +95,13 @@ public class CompleteProfileFragment extends Fragment {
     private StorageReference mStorageRef;
 
     //initialize the Firebase Database
-    private FirebaseDatabase mDatabase;
+    //private FirebaseDatabase mDatabase;
+    private FirebaseFirestore db;
+
 
     //initialize the Firebase UsersReference
-    private DatabaseReference mUsersRef;
+    //private DatabaseReference mUsersRef;
+    private DocumentReference UserDocRef ;
 
     /*private String mName;
     private String mEmail;
@@ -203,7 +212,12 @@ public class CompleteProfileFragment extends Fragment {
             public void onClick(View view) {
                 //onButtonPressed("submitProfileClicked");
                 Log.d(TAG, "mSubmitButton clicked ");
-                submitProfile();
+                if(sPhotoResultUri != null || mParamPhotoUrl != null ){
+                    uploadAvatar();
+                }else{
+                    submitProfile(null);
+                }
+
             }
         });
 
@@ -250,8 +264,9 @@ public class CompleteProfileFragment extends Fragment {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         // Obtain the FirebaseDatabase instance.
-        mDatabase = FirebaseDatabase.getInstance();
-        mUsersRef = mDatabase.getReference().child("users");
+        /*mDatabase = FirebaseDatabase.getInstance();
+        mUsersRef = mDatabase.getReference().child("users");*/
+        db =  FirebaseFirestore.getInstance();
 
         mProgress = new ProgressDialog(this.getActivity());
 
@@ -371,12 +386,12 @@ public class CompleteProfileFragment extends Fragment {
 
 
                 break;
-            default: //do twitter again just in case
+            default:
                 break;
         }
     }
 
-    private void submitProfile() {
+    private void submitProfile( Uri downloadUri) {
         sname = mNameField.getText().toString().trim();
         sEmail = mEmailField.getText().toString().trim();
 
@@ -386,14 +401,32 @@ public class CompleteProfileFragment extends Fragment {
             mProgress.setMessage(this.getActivity().getString(R.string.submitting_in_progress));
             mProgress.show();
 
-            mUsersRef.child(mParamUserId).child("name").setValue(sname);
-            mUsersRef.child(mParamUserId).child("email").setValue(sEmail);
-            if(sPhotoResultUri != null){
-                uploadAvatar();
+            Map<String, Object> user = new HashMap<>();
+            /*mUsersRef.child(mParamUserId).child("name").setValue(sname);
+            mUsersRef.child(mParamUserId).child("email").setValue(sEmail);*/
+            user.put("name", sname);
+            user.put("email", sEmail);
+            if(downloadUri != null){
+                //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
+                user.put("avatar", downloadUri.toString());
             }else{
-                mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+                //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+                user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
             }
-
+            db.collection("users").document(mParamUserId)
+                    .set(user)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully written!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error writing document", e);
+                        }
+                    });
 
         }else{
             mNameField.setError(getActivity().getString(R.string.required));
@@ -406,24 +439,24 @@ public class CompleteProfileFragment extends Fragment {
     }
 
     private void uploadAvatar() {
-
+        sname = mNameField.getText().toString().trim();
         StorageReference avatarRef = mStorageRef.child("images")
                 .child("avatars")
                 .child(mParamUserId)
                 //.child(sPhotoResultUri.getLastPathSegment());
                 .child(sname);
-
         avatarRef.putFile(sPhotoResultUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Log.d(TAG, "uploadFromUri:onSuccess");
-
                         // Get a URL to the uploaded content
-                        @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        if(downloadUrl != null){
+                        Uri downloadUri = taskSnapshot.getDownloadUrl();
+                        Log.d(TAG, "downloadUrl on uploadAvatar= "+ downloadUri);
+                        submitProfile(downloadUri);
+                        /*if(downloadUrl != null){
                             mUsersRef.child(mParamUserId).child("avatar").setValue(downloadUrl.toString());
-                        }
+                        }*/
                         mProgress.dismiss();
 
                     }

@@ -62,8 +62,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     //initialize the Firebase UsersReference
     //public DatabaseReference UsersRef;
-    //DocumentReference UserDocRef ;
-    CollectionReference usersColRef;
+    //public DocumentReference UserDocRef ;
+    public CollectionReference usersColRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
