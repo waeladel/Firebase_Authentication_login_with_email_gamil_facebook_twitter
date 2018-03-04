@@ -89,9 +89,9 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                     Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
                     Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
                     Log.d(TAG, "onAuthStateChanged:signed_in_emailVerified?:" + user.isEmailVerified());
-                    if(!isUserExist(currentUserId)){
-                        completeProfile(currentUserId, currentUserName, currentUserEmail, currentUserPhoto, currentUserVerified);
-                    }
+
+                    isUserExist(currentUserId); // if not start complete profile
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -253,7 +253,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
         }
     }
 
-    private boolean isUserExist(final String userId){
+    private void isUserExist(final String userId){
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + userId);
         DocumentReference UserDoc = db.collection("users").document(userId);
@@ -263,21 +263,16 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document != null && document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        userExist = true;
+                        Log.d(TAG, "user exist DocumentSnapshot data: " + document.getData());
                     } else {
                         Log.d(TAG, "No such user");
-                        userExist = false;
+                        completeProfile(currentUserId, currentUserName, currentUserEmail, currentUserPhoto, currentUserVerified);
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
-                    userExist = false;
                 }
             }
         });
-
-        Log.d(TAG, "userExist = " +userExist);
-        return userExist;
 
         /*UsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
