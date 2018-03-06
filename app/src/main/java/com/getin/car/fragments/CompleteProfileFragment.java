@@ -136,6 +136,8 @@ public class CompleteProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate savedInstanceState= "+ savedInstanceState);
+
         if (getArguments() != null) {
             mParamUserId = getArguments().getString(ARG_PARAM_USERID);
             mParamDisplayName = getArguments().getString(ARG_PARAM_DISPLAYNAME);
@@ -160,6 +162,7 @@ public class CompleteProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
+        Log.d(TAG, "onCreateView savedInstanceState= "+ savedInstanceState);
 
         mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
         if(mParamDisplayName != null){
@@ -234,13 +237,12 @@ public class CompleteProfileFragment extends Fragment {
 
         Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
 
-        if (mParamPhotoUrl != null ){
-            Glide.with(this).load(mParamPhotoUrl).into(mProfileImageButton);
-            Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +mParamPhotoUrl);
-        }
-        else if( sPhotoResultUri != null){
+        if( sPhotoResultUri != null){
             mProfileImageButton.setImageURI(sPhotoResultUri);
             Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
+        } else if (mParamPhotoUrl != null ){
+            Glide.with(this).load(mParamPhotoUrl).into(mProfileImageButton);
+            Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +mParamPhotoUrl);
         }
 
         mGallerySelectButton.setOnClickListener(new View.OnClickListener() {
