@@ -235,11 +235,11 @@ public class CompleteProfileFragment extends Fragment {
 
         Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
 
-        if (mParamPhotoUrl != null && sPhotoResultUri == null){
+        if (mParamPhotoUrl != null ){
             Glide.with(this).load(mParamPhotoUrl).into(mProfileImageButton);
             Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +mParamPhotoUrl);
         }
-        else if( mParamPhotoUrl == null && sPhotoResultUri != null){
+        else if( sPhotoResultUri != null){
             mProfileImageButton.setImageURI(sPhotoResultUri);
             Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
         }

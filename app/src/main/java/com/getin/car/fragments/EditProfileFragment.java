@@ -24,17 +24,31 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.getin.car.R;
 import com.getin.car.authentication.FirebaseUtils;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
+import com.yanzhenjie.album.Action;
+import com.yanzhenjie.album.Album;
+import com.yanzhenjie.album.AlbumFile;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -50,6 +64,9 @@ public class EditProfileFragment extends Fragment {
 
     private static String TAG = EditProfileFragment.class.getSimpleName();
 
+    private static final int SELECT_MULTIMEDIA = 2;
+    private ArrayList<AlbumFile> mMediaFiles;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM_USERID = "userId";
@@ -64,14 +81,11 @@ public class EditProfileFragment extends Fragment {
     private EditText mEmailField;
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
-    private ImageButton mCameraSelectButton;
     private ImageButton mGallerySelectButton;
 
 
     private static Uri sPhotoResultUri;
 
-    private static final int SELECT_PICTURE = 3;
-    private static final int REQUEST_IMAGE_CAPTURE = 4;
 
     private static String sname;
     private static String sEmail;
@@ -86,10 +100,13 @@ public class EditProfileFragment extends Fragment {
     private StorageReference mStorageRef;
 
     //initialize the Firebase Database
-    private FirebaseDatabase mDatabase;
+    //private FirebaseDatabase mDatabase;
+    private FirebaseFirestore db;
+
 
     //initialize the Firebase UsersReference
-    private DatabaseReference mCurrentUsersRef;
+    //private DatabaseReference mUsersRef;
+    private DocumentReference UserDocRef ;
 
     /*private String mName;
     private String mEmail;
@@ -124,34 +141,65 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
-        // Obtain the FirebaseDatabase instance.
-        mDatabase = FirebaseDatabase.getInstance();
-        mCurrentUsersRef = mDatabase.getReference().child("users").child(mParamUserId);
+        mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
+        mEmailField = (EditText)fragView.findViewById(R.id.edit_email_editText);
 
+        mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
+        mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
+
+        // Obtain the FirebaseStorage instance.
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        // Obtain the FirebaseDatabase instance.
+        /*mDatabase = FirebaseDatabase.getInstance();
+        mUsersRef = mDatabase.getReference().child("users");*/
+        db =  FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("users").document(mParamUserId);
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + mParamUserId);
-        mCurrentUsersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value.
-                Log.d(TAG, "dataSnapshot = " + dataSnapshot);
-                sname = dataSnapshot.child("name").getValue(String.class);
-                sEmail = dataSnapshot.child("email").getValue(String.class);
-                sAvatarUrl = dataSnapshot.child("avatar").getValue(String.class);
-            }
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
+                        sname = document.getString("name");
+                        if(sname != null){
+                            mNameField.setText(sname);
+                            Log.d(TAG, "DocumentSnapshot sname: " + sname);
+                        }
+                        sEmail = document.getString("email");
+                        if(sEmail != null){
+                            mEmailField.setText(sEmail);
+                            Log.d(TAG, "DocumentSnapshot sEmail: " + sEmail);
+                        }
+
+                        sAvatarUrl = document.getString("avatar");
+                        if (sAvatarUrl != null){
+                            Glide.with(EditProfileFragment.this).load(sAvatarUrl).into(mProfileImageButton);
+                            Log.d(TAG, "mProfileImageButton sAvatarUrl= " +sAvatarUrl);
+                        }
+                        else if(sPhotoResultUri != null){
+                            mProfileImageButton.setImageURI(sPhotoResultUri);
+                            Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
+                        }
+
+                        Log.d(TAG, "DocumentSnapshot sAvatarUrl: " + sAvatarUrl);
+                        Log.d(TAG, "sPhotoResultUri: " + sPhotoResultUri);
+
+
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
             }
         });
 
 
-        mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
-        if(sname != null){
-            mNameField.setText(sname);
-        }
         mNameField.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -171,11 +219,6 @@ public class EditProfileFragment extends Fragment {
                 // other stuffs
             }
         });
-
-        mEmailField = (EditText)fragView.findViewById(R.id.edit_email_editText);
-        if(sEmail != null){
-            mEmailField.setText(sEmail);
-        }
 
         mEmailField.addTextChangedListener(new TextWatcher() {
 
@@ -203,34 +246,27 @@ public class EditProfileFragment extends Fragment {
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //onButtonPressed("submitProfileClicked");
                 Log.d(TAG, "mSubmitButton clicked ");
-                submitProfile();
+                mProgress.setMessage(getActivity().getString(R.string.submitting_in_progress));
+                mProgress.show();
+
+                if(sPhotoResultUri != null ){
+                    uploadAvatar();
+                }else{
+                    submitProfile(null);
+                }
             }
         });
-
-        mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
-        mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
-
-        Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
-
-        if (sAvatarUrl != null && sPhotoResultUri == null){
-            Glide.with(this).load(sAvatarUrl).into(mProfileImageButton);
-            Log.d(TAG, "mProfileImageButton mParamPhotoUrl= " +sAvatarUrl);
-        }
-        else if( sAvatarUrl == null && sPhotoResultUri != null){
-            mProfileImageButton.setImageURI(sPhotoResultUri);
-            Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
-        }
 
         mGallerySelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "mProfileImageButton clicked ");
-                Intent galleryIntent = new Intent();
-                galleryIntent.setType("image/*");
+                /*Intent galleryIntent = new Intent();
+                galleryIntent.setType("image*//*");
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(galleryIntent, SELECT_PICTURE);
+                startActivityForResult(galleryIntent, SELECT_PICTURE);*/
+                selectMedia();
             }
         });
 
@@ -273,12 +309,12 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
+        if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
-        }*/
+        }
     }
 
     @Override
@@ -297,20 +333,25 @@ public class EditProfileFragment extends Fragment {
         }*/
     }
 
+
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "requestCode ="+ requestCode);
 
         switch (requestCode){
-            case SELECT_PICTURE:
+            /*case SELECT_PICTURE:
                 Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
                 Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
                 if (resultCode == RESULT_OK) {
                     Uri imageUri = data.getData();
                     CropImage.activity(imageUri)
                             //.setGuidelines(CropImageView.Guidelines.ON)
-                            .setAspectRatio(1,1)
+                            .setAllowRotation(true)
+                            .setAutoZoomEnabled(true)
+                            //.setAspectRatio(1,1)
+                            .setFixAspectRatio(true)
                             //.setMaxCropResultSize(600, 600)
                             .setMinCropResultSize(300,300)
                             .setRequestedSize(300,300) //resize
@@ -321,26 +362,8 @@ public class EditProfileFragment extends Fragment {
                             Toast.LENGTH_SHORT).show();
                 }
 
-                break;
-            case REQUEST_IMAGE_CAPTURE:
-                Log.d(TAG, "SELECT_PICTURE requestCode="+ requestCode);
-                Log.d(TAG, "SELECT_PICTURE resultCode ="+ resultCode);
-                if (resultCode == RESULT_OK) {
-                    Uri imageUri = data.getData();
-                    CropImage.activity(imageUri)
-                            //.setGuidelines(CropImageView.Guidelines.ON)
-                            .setAspectRatio(1,1)
-                            //.setMaxCropResultSize(600, 600)
-                            .setMinCropResultSize(300,300)
-                            .setRequestedSize(300,300) //resize
-                            .start(getContext(), this);
-                } else {
-                    //Exception error = result.getError();
-                    Toast.makeText(getActivity(), R.string.error,
-                            Toast.LENGTH_SHORT).show();
-                }
+                break;*/
 
-                break;
             case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
                 Log.d(TAG, "CROP_PICTURE ="+ requestCode);
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
@@ -352,33 +375,52 @@ public class EditProfileFragment extends Fragment {
                     Toast.makeText(getActivity(), error.toString(),
                             Toast.LENGTH_LONG).show();
                 }
-
-
                 break;
-            default: //do twitter again just in case
+            default:
                 break;
         }
     }
 
-    private void submitProfile() {
+    private void submitProfile( Uri downloadUri) {
         sname = mNameField.getText().toString().trim();
         sEmail = mEmailField.getText().toString().trim();
 
         Log.d(TAG, "CROP_PICTURE_sPhotoResultUri ="+ sPhotoResultUri);
 
         if(FirebaseUtils.isValidEmail(sEmail) && FirebaseUtils.isValidName(sname)){
-            mProgress.setMessage(this.getActivity().getString(R.string.submitting_in_progress));
-            mProgress.show();
 
-            mCurrentUsersRef.child("name").setValue(sname);
-            mCurrentUsersRef.child("email").setValue(sEmail);
-            if(sPhotoResultUri != null){
-                uploadAvatar();
+            Map<String, Object> user = new HashMap<>();
+            /*mUsersRef.child(mParamUserId).child("name").setValue(sname);
+            mUsersRef.child(mParamUserId).child("email").setValue(sEmail);*/
+            user.put("name", sname);
+            user.put("email", sEmail);
+            if(downloadUri != null){
+                //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
+                user.put("avatar", downloadUri.toString());
+            }else if(sAvatarUrl != null){
+                user.put("avatar", sAvatarUrl.toString());
             }else{
-                mCurrentUsersRef.child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
-                mProgress.dismiss();
+                //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+                user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
             }
+            db.collection("users").document(mParamUserId)
+                    .set(user)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully written!");
+                            onButtonPressed("submitProfile");// to finish the fragment
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error writing document", e);
+                            Toast.makeText(getActivity(), R.string.submit_profile_error,
+                                    Toast.LENGTH_LONG).show();
 
+                        }
+                    });
 
         }else{
             mNameField.setError(getActivity().getString(R.string.required));
@@ -387,30 +429,36 @@ public class EditProfileFragment extends Fragment {
             Toast.makeText(getActivity(), R.string.empty_email_name,
                     Toast.LENGTH_LONG).show();
         }
+
         mProgress.dismiss();
+
     }
 
     private void uploadAvatar() {
-
+        sname = mNameField.getText().toString().trim();
         StorageReference avatarRef = mStorageRef.child("images")
                 .child("avatars")
                 .child(mParamUserId)
                 //.child(sPhotoResultUri.getLastPathSegment());
                 .child(sname);
-
-        avatarRef.putFile(sPhotoResultUri)
+        Uri storageUploadUri; // to determine wither to upload sPhotoResultUri or mParamPhotoUrl
+        if(sPhotoResultUri != null){
+            storageUploadUri = sPhotoResultUri;
+        }else{
+            return;
+        }
+        avatarRef.putFile(storageUploadUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         Log.d(TAG, "uploadFromUri:onSuccess");
-
                         // Get a URL to the uploaded content
-                        @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        if(downloadUrl != null){
-                            mCurrentUsersRef.child("avatar").setValue(downloadUrl.toString());
-                        }
-                        mProgress.dismiss();
-
+                        Uri downloadUri = taskSnapshot.getDownloadUrl();
+                        Log.d(TAG, "downloadUrl on uploadAvatar= "+ downloadUri);
+                        submitProfile(downloadUri);
+                        /*if(downloadUrl != null){
+                            mUsersRef.child(mParamUserId).child("avatar").setValue(downloadUrl.toString());
+                        }*/
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -418,9 +466,53 @@ public class EditProfileFragment extends Fragment {
                     public void onFailure(@NonNull Exception exception) {
                         // Handle unsuccessful uploads
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
-                        mProgress.dismiss();
                     }
                 });
+    }
+
+    private void selectMedia() {
+        Album.image(this) // Image and video mix options.
+                .singleChoice() // Multi-Mode, Single-Mode: singleChoice().
+                .requestCode(200) // The request code will be returned in the listener.
+                .columnCount(SELECT_MULTIMEDIA) // The number of columns in the page list.
+                //.selectCount(1)  // Choose up to a few images.
+                .camera(true) // Whether the camera appears in the Item.
+                .onResult(new Action<ArrayList<AlbumFile>>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull ArrayList<AlbumFile> result) {
+                        // accept the result.
+                        mMediaFiles = result;
+                        AlbumFile albumFile = mMediaFiles.get(0);
+                        Uri MediaUri = Uri.parse(albumFile.getPath()) ;
+
+                        Log.d(TAG, "MediaType" +albumFile.getMediaType());
+                        Log.d(TAG, "MediaUri" +MediaUri);
+
+                        cropImage(MediaUri);
+                    }
+                })
+                .onCancel(new Action<String>() {
+                    @Override
+                    public void onAction(int requestCode, @NonNull String result) {
+                        // The user canceled the operation.
+                    }
+                })
+                .start();
+    }
+
+    private void cropImage(Uri imageUri) {
+        CropImage.activity(Uri.fromFile(new File(imageUri.toString())))
+                //.setGuidelines(CropImageView.Guidelines.ON)
+                .setAllowRotation(true)
+                .setAutoZoomEnabled(true)
+                //.setAspectRatio(1,1)
+                .setFixAspectRatio(true)
+                //.setMaxCropResultSize(600, 600)
+                .setMinCropResultSize(300,300)
+                .setRequestedSize(300,300) //resize
+                .start(getContext(), this);
+        Log.d(TAG, "cropImage starts" +imageUri);
+
     }
 
     /**

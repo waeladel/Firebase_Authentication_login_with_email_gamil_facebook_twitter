@@ -29,6 +29,8 @@
     <string name="required">Required</string>
     <string name="password_must_be_six">Password must be at least 6 characters</string>
     <string name="email_is_not_valid">A valid email is required</string>
+    <string name="submit_profile_error">Sorry, couldn\'t submit your profile.</string>
+    <!-- Warning messages and Toast -->
     <string name="title_activity_profile">Profile</string>
     <string name="fb_login_protocol_scheme">fb1010966069035103</string>
     <string name="facebook_application_id">1010966069035103</string>

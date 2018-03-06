@@ -28,9 +28,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 //import com.twitter.sdk.android.Twitter;
 
-public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener{
+public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener, EditProfileFragment.OnFragmentInteractionListener{
 
     private final static String TAG = ProfileActivity.class.getSimpleName();
     private static final int REQUEST_INVITE = 13;
@@ -132,7 +134,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                 FragmentTransaction editTransaction =fragmentManager.beginTransaction();
                 editTransaction.add(R.id.content_profile, editProfileFragment,"editProfileFrag");
-                //editTransaction.addToBackStack("editProfileFrag");
+                editTransaction.addToBackStack("editProfileFrag");
                 editTransaction.commit();
                 break;
             case R.id.action_menu_invite:
@@ -229,15 +231,15 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
         Log.d(TAG, "FragmentName = "+ FragmentName);
 
         switch (FragmentName){
-            case "EditProfile":
+            /*case "EditProfile":
                 //Replace current fragment with Register Fragment
-                /*mRegisterFragment  = new RegisterFragment();
+                mRegisterFragment  = new RegisterFragment();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                 FragmentTransaction RegisterTransaction =fragmentManager.beginTransaction();
                 RegisterTransaction.replace(R.id.content_main, mRegisterFragment,"mRegisterFragment");
                 //RegisterTransaction.addToBackStack("RegisterClicked");
-                RegisterTransaction.commit();*/
-                break;
+                RegisterTransaction.commit();
+                break;*/
             /*case "LoginClicked":
                 //Replace current fragment with Register Fragment
                 LoginFragment mLoginFragment = (LoginFragment) fragmentManager.findFragmentByTag("mLoginFragment");
@@ -248,6 +250,10 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                     RemoveLoginTransaction.commit();
                 }
                 break;*/
+            case "submitProfile":
+                fragmentManager.popBackStack("editProfileFrag",POP_BACK_STACK_INCLUSIVE);
+
+                break;
             default:
                 break;
         }
