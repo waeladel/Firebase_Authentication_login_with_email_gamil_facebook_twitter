@@ -67,7 +67,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 completeProfileFrag  = new CompleteProfileFragment();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                 FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
-                completeTransaction.add(R.id.content_profile, completeProfileFrag,"CompleteProfileFrag");
+                completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
                 //completeTransaction.addToBackStack("CompleteProfileClicked");
                 completeTransaction.commit();
             }
@@ -229,6 +229,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
     @Override
     public void onFragmentInteraction(String FragmentName) {// listens to login fragments buttons
         Log.d(TAG, "FragmentName = "+ FragmentName);
+        Log.d(TAG, "FragmentName = "+  fragmentManager.findFragmentByTag("completeProfileFrag"));
 
         switch (FragmentName){
             /*case "EditProfile":
@@ -250,9 +251,20 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                     RemoveLoginTransaction.commit();
                 }
                 break;*/
+            case "completeProfile":
+                //fragmentManager.popBackStack();
+                CompleteProfileFragment CompleteProfile = (CompleteProfileFragment) fragmentManager.findFragmentByTag("completeProfileFrag");
+                FragmentTransaction RemoveTransaction =fragmentManager.beginTransaction();
+                Log.d(TAG, "FragmentName CompleteProfile= "+ CompleteProfile);
+                //RemoveLoginTransaction.addToBackStack(null);
+                if (CompleteProfile != null){
+                    RemoveTransaction.remove(CompleteProfile);
+                    RemoveTransaction.commit();
+                }
+
+                break;
             case "submitProfile":
                 fragmentManager.popBackStack("editProfileFrag",POP_BACK_STACK_INCLUSIVE);
-
                 break;
             default:
                 break;

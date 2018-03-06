@@ -216,7 +216,6 @@ public class CompleteProfileFragment extends Fragment {
         mSubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //onButtonPressed("submitProfileClicked");
                 Log.d(TAG, "mSubmitButton clicked ");
                 mProgress.setMessage(getActivity().getString(R.string.submitting_in_progress));
                 mProgress.show();
@@ -301,12 +300,12 @@ public class CompleteProfileFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
+        if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
-        }*/
+        }
     }
 
     @Override
@@ -399,6 +398,7 @@ public class CompleteProfileFragment extends Fragment {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Log.d(TAG, "DocumentSnapshot successfully written!");
+                            onButtonPressed("completeProfile");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
