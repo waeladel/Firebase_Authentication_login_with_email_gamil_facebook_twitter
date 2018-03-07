@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -83,7 +84,7 @@ public class CompleteProfileFragment extends Fragment {
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
     private ImageButton mGallerySelectButton;
-
+    private Spinner genderSpinner;
 
     private static Uri sPhotoResultUri;
 
@@ -241,6 +242,9 @@ public class CompleteProfileFragment extends Fragment {
         mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
         mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
 
+        genderSpinner = (Spinner) fragView.findViewById(R.id.gender_spinner);
+
+
         Log.d(TAG, "sPhotoResultUri = " +sPhotoResultUri);
 
         if( sPhotoResultUri != null){
@@ -393,6 +397,15 @@ public class CompleteProfileFragment extends Fragment {
         }else{
             //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
             user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
+        }
+
+        switch (genderSpinner.getSelectedItemPosition()){ //switch mode spinner position
+            case 0:
+                user.put("gender", "Male");
+                break;
+            case 1:
+                user.put("gender", "Female");
+                break;
         }
 
         if(FirebaseUtils.isValidEmail(sEmail) && FirebaseUtils.isValidName(sname)){
