@@ -143,12 +143,15 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 break;
             case R.id.action_edit_profile:
                 Log.d(TAG, "MenuItem = 1");
-                editProfileFragment  = EditProfileFragment.newInstance(currentUserId);//new EditProfileFrag();
-                //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
-                FragmentTransaction editTransaction =fragmentManager.beginTransaction();
-                editTransaction.add(R.id.content_profile, editProfileFragment,"editProfileFrag");
-                editTransaction.addToBackStack("editProfileFrag");
-                editTransaction.commit();
+                if(fragmentManager.findFragmentByTag("editProfileFrag") == null) { // to create only one instant of postFrag
+                    editProfileFragment  = EditProfileFragment.newInstance(currentUserId);//new EditProfileFrag();
+                    //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
+                    FragmentTransaction editTransaction =fragmentManager.beginTransaction();
+                    editTransaction.add(R.id.content_profile, editProfileFragment,"editProfileFrag");
+                    editTransaction.addToBackStack("editProfileFrag");
+                    editTransaction.commit();
+                }
+
                 break;
             case R.id.action_menu_invite:
                 Log.d(TAG, "MenuItem = 2  INVITE clicked ");
