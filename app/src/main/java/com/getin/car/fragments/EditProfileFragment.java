@@ -71,7 +71,6 @@ public class EditProfileFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM_USERID = "userId";
 
-
     // TODO: Rename and change types of parameters
     private String mParamUserId ;
 
@@ -85,7 +84,6 @@ public class EditProfileFragment extends Fragment {
 
 
     private static Uri sPhotoResultUri;
-
 
     private static String sname;
     private static String sEmail;
@@ -129,6 +127,8 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate savedInstanceState= "+ savedInstanceState);
+
         if (getArguments() != null) {
             mParamUserId = getArguments().getString(ARG_PARAM_USERID);
             Log.d(TAG, "mParamUserId= "+ mParamUserId);
@@ -138,6 +138,8 @@ public class EditProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView savedInstanceState= "+ savedInstanceState);
+
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
@@ -153,51 +155,23 @@ public class EditProfileFragment extends Fragment {
         // Obtain the FirebaseDatabase instance.
         /*mDatabase = FirebaseDatabase.getInstance();
         mUsersRef = mDatabase.getReference().child("users");*/
-        db =  FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection("users").document(mParamUserId);
+
+
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + mParamUserId);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document != null && document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
-                        sname = document.getString("name");
-                        if(sname != null){
-                            mNameField.setText(sname);
-                            Log.d(TAG, "DocumentSnapshot sname: " + sname);
-                        }
-                        sEmail = document.getString("email");
-                        if(sEmail != null){
-                            mEmailField.setText(sEmail);
-                            Log.d(TAG, "DocumentSnapshot sEmail: " + sEmail);
-                        }
+        if(sPhotoResultUri != null){
+            mProfileImageButton.setImageURI(sPhotoResultUri);
+            Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
+        } else if (sAvatarUrl != null){
+            Glide.with(EditProfileFragment.this).load(sAvatarUrl).into(mProfileImageButton);
+            Log.d(TAG, "mProfileImageButton wael sAvatarUrl= " +sAvatarUrl);
+        }
 
-                        sAvatarUrl = document.getString("avatar");
-                        if (sAvatarUrl != null){
-                            Glide.with(EditProfileFragment.this).load(sAvatarUrl).into(mProfileImageButton);
-                            Log.d(TAG, "mProfileImageButton sAvatarUrl= " +sAvatarUrl);
-                        }
-                        else if(sPhotoResultUri != null){
-                            mProfileImageButton.setImageURI(sPhotoResultUri);
-                            Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
-                        }
-
-                        Log.d(TAG, "DocumentSnapshot sAvatarUrl: " + sAvatarUrl);
-                        Log.d(TAG, "sPhotoResultUri: " + sPhotoResultUri);
-
-
-                    } else {
-                        Log.d(TAG, "No such document");
-                    }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
+        if (savedInstanceState == null) {
+            fetchData();
+            Log.d(TAG, "fetchData: savedInstanceState= " + savedInstanceState);
+        }
 
 
         mNameField.addTextChangedListener(new TextWatcher() {
@@ -299,6 +273,53 @@ public class EditProfileFragment extends Fragment {
         return fragView;
     }
 
+    private void fetchData() {
+
+        db =  FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("users").document(mParamUserId);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        sname = document.getString("name");
+                        if(sname != null){
+                            mNameField.setText(sname);
+                            Log.d(TAG, "DocumentSnapshot sname: " + sname);
+                        }
+                        sEmail = document.getString("email");
+                        if(sEmail != null){
+                            mEmailField.setText(sEmail);
+                            Log.d(TAG, "DocumentSnapshot sEmail: " + sEmail);
+                        }
+
+                        sAvatarUrl = document.getString("avatar");
+                        if(sPhotoResultUri != null){
+                            mProfileImageButton.setImageURI(sPhotoResultUri);
+                            Log.d(TAG, "mProfileImageButton sPhotoResultUri= " +sPhotoResultUri);
+                        } else if (sAvatarUrl != null){
+                            Glide.with(EditProfileFragment.this).load(sAvatarUrl).into(mProfileImageButton);
+                            Log.d(TAG, "DocumentSnapshot mProfileImageButton sAvatarUrl= " +sAvatarUrl);
+                        }
+
+
+                        Log.d(TAG, "DocumentSnapshot sAvatarUrl: " + sAvatarUrl);
+                        Log.d(TAG, "DocumentSnapshot sPhotoResultUri: " + sPhotoResultUri);
+
+
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    //listener.onFailed(task.getException());
+                }
+            }
+        });
+
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(String fragmentName) {
         if (mListener != null) {
@@ -308,6 +329,8 @@ public class EditProfileFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach savedInstanceState= ");
+
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -320,12 +343,13 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "onStart");
+        Log.d(TAG, "onStart savedInstanceState");
         //mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     public void onDetach() {
+        Log.d(TAG, "onDetach savedInstanceState");
         super.onDetach();
         mListener = null;
         /*if (mAuthListener != null) {
@@ -528,5 +552,10 @@ public class EditProfileFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(String FragmentName);
+    }
+
+    public interface OnGetDataListener { // interface to deal with database callbacks
+        public void onSuccess(DocumentSnapshot data);
+        //public void onFailed(DatabaseError databaseError);
     }
 }

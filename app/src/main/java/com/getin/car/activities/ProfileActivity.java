@@ -77,12 +77,12 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                completeProfileFrag  = new CompleteProfileFragment();
+                /*completeProfileFrag  = new CompleteProfileFragment();
                 //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                 FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
                 completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
                 //completeTransaction.addToBackStack("CompleteProfileClicked");
-                completeTransaction.commit();
+                completeTransaction.commit();*/
             }
         });
 
