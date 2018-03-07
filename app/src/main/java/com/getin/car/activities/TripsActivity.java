@@ -24,18 +24,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 //import com.twitter.sdk.android.Twitter;
 
-public class ProfileActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener, EditProfileFragment.OnFragmentInteractionListener{
+public class TripsActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener, EditProfileFragment.OnFragmentInteractionListener{
 
-    private final static String TAG = ProfileActivity.class.getSimpleName();
+    private final static String TAG = TripsActivity.class.getSimpleName();
     private static final int REQUEST_INVITE = 13;
 
     //initialize the FirebaseAuth instance
@@ -54,7 +51,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "ProfileActivity onCreate");
+        Log.d(TAG, "TripsActivity onCreate");
         Log.d(TAG, "savedInstanceState:" + savedInstanceState);
         setContentView(R.layout.activity_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -112,7 +109,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                     Log.d(TAG, "onAuthStateChanged:signed_out");
 
                     //  Removing Fragments if Exists and their back stacks
-                    Intent mIntent = new Intent(ProfileActivity.this, MainActivity.class);
+                    Intent mIntent = new Intent(TripsActivity.this, MainActivity.class);
                     //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(mIntent);
@@ -208,7 +205,7 @@ public class ProfileActivity extends BaseActivity implements CompleteProfileFrag
                     Log.d(TAG, "onActivityResult: sent invitation " + id);
                 }
             } else {
-                Toast.makeText(ProfileActivity.this, getString(R.string.invitation_failed),
+                Toast.makeText(TripsActivity.this, getString(R.string.invitation_failed),
                         Toast.LENGTH_LONG).show();
                 // Sending failed or it was canceled, show failure message to the user
                 // ...

@@ -231,7 +231,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     if (mRegisterFragment != null){
                         fragmentManager.beginTransaction().remove(mRegisterFragment).commit() ;                   //RegisterTransaction.addToBackStack(null);
                     }*/
-                    Intent mIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                    Intent mIntent = new Intent(MainActivity.this, TripsActivity.class);
                     //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(mIntent);
@@ -350,7 +350,7 @@ public class MainActivity extends BaseActivity implements LoginFragment.OnFragme
                     //fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                     //fragmentManager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 }
-                Intent mIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                Intent mIntent = new Intent(MainActivity.this, TripsActivity.class);
                 //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(mIntent);

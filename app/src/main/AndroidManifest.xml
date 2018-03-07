@@ -56,7 +56,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ProfileActivity"
+            android:name=".activities.TripsActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity

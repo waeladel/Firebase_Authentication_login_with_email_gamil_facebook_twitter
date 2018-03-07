@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/com_facebook_button_background_color_focused_disabled"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.getin.car.activities.ProfileActivity"
+    tools:context="com.getin.car.activities.TripsActivity"
     tools:showIn="@layout/activity_profile">
 
 
