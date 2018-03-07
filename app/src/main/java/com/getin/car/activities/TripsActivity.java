@@ -80,7 +80,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                     //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                     FragmentTransaction PostTransaction =fragmentManager.beginTransaction();
                     PostTransaction.add(R.id.content_profile, PostFrag,"PostFrag");
-                    PostTransaction.addToBackStack("Post");
+                    PostTransaction.addToBackStack("PostFrag");
                     PostTransaction.commit();
                 }
 
