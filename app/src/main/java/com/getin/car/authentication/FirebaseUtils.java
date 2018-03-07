@@ -58,7 +58,8 @@ abstract public class FirebaseUtils {
 
     public static boolean isValidName(CharSequence name) {
 
-        if (TextUtils.isEmpty(name)){
+        if (TextUtils.isEmpty(name) || name.length()<= 1){
+            Log.d(TAG, "name length= "+ name.length());
             return false;
         } else {
             return true;

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -81,6 +82,7 @@ public class EditProfileFragment extends Fragment {
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
     private ImageButton mGallerySelectButton;
+    private  Spinner genderSpinner;
 
 
     private static Uri sPhotoResultUri;
@@ -149,13 +151,15 @@ public class EditProfileFragment extends Fragment {
         mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
         mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
 
+        genderSpinner = (Spinner) fragView.findViewById(R.id.gender_spinner);
+
         // Obtain the FirebaseStorage instance.
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         // Obtain the FirebaseDatabase instance.
         /*mDatabase = FirebaseDatabase.getInstance();
         mUsersRef = mDatabase.getReference().child("users");*/
-
+        db =  FirebaseFirestore.getInstance();
 
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + mParamUserId);
@@ -182,6 +186,10 @@ public class EditProfileFragment extends Fragment {
                 String EditableName = editable.toString().trim();
                 if(TextUtils.isEmpty(EditableName)){
                     mNameField.setError(getActivity().getString(R.string.required));
+                }else if(!TextUtils.isEmpty(EditableName)&& !FirebaseUtils.isValidName(EditableName)){
+                    mNameField.setError(getActivity().getString(R.string.name_must_be_two));
+                }else{
+                    mNameField.setError(null);
                 }
             }
             @Override
@@ -204,6 +212,8 @@ public class EditProfileFragment extends Fragment {
                     mEmailField.setError(getActivity().getString(R.string.required));
                 }else if(!TextUtils.isEmpty(EditableEmail)&& !FirebaseUtils.isValidEmail(EditableEmail)){
                     mEmailField.setError(getActivity().getString(R.string.email_is_not_valid));
+                }else{
+                    mEmailField.setError(null);
                 }
             }
             @Override
@@ -275,7 +285,6 @@ public class EditProfileFragment extends Fragment {
 
     private void fetchData() {
 
-        db =  FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("users").document(mParamUserId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -303,10 +312,19 @@ public class EditProfileFragment extends Fragment {
                             Log.d(TAG, "DocumentSnapshot mProfileImageButton sAvatarUrl= " +sAvatarUrl);
                         }
 
+                        if (document.getString("gender") != null){
+                            switch (document.getString("gender")){ // display mode spinner value from shared preference
+                                case "Male":
+                                    genderSpinner.setSelection(0);
+                                    break;
+                                case "Female":
+                                    genderSpinner.setSelection(1);
+                                    break;
+                            }
+                        }
 
                         Log.d(TAG, "DocumentSnapshot sAvatarUrl: " + sAvatarUrl);
                         Log.d(TAG, "DocumentSnapshot sPhotoResultUri: " + sPhotoResultUri);
-
 
                     } else {
                         Log.d(TAG, "No such document");
@@ -409,24 +427,36 @@ public class EditProfileFragment extends Fragment {
         sname = mNameField.getText().toString().trim();
         sEmail = mEmailField.getText().toString().trim();
 
+        Log.d(TAG, "db users="+ db + "  "+ db.collection("users"));
+
         Log.d(TAG, "CROP_PICTURE_sPhotoResultUri ="+ sPhotoResultUri);
+        Map<String, Object> user = new HashMap<>();
+
+        if(downloadUri != null){
+            //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
+            user.put("avatar", downloadUri.toString());
+        }else if(sAvatarUrl != null){
+            user.put("avatar", sAvatarUrl);
+        }else{
+            //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+            user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
+        }
+
+        switch (genderSpinner.getSelectedItemPosition()){ //switch mode spinner position
+            case 0:
+                user.put("gender", "Male");
+                break;
+            case 1:
+                user.put("gender", "Female");
+                break;
+        }
 
         if(FirebaseUtils.isValidEmail(sEmail) && FirebaseUtils.isValidName(sname)){
-
-            Map<String, Object> user = new HashMap<>();
             /*mUsersRef.child(mParamUserId).child("name").setValue(sname);
             mUsersRef.child(mParamUserId).child("email").setValue(sEmail);*/
             user.put("name", sname);
             user.put("email", sEmail);
-            if(downloadUri != null){
-                //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
-                user.put("avatar", downloadUri.toString());
-            }else if(sAvatarUrl != null){
-                user.put("avatar", sAvatarUrl.toString());
-            }else{
-                //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
-                user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
-            }
+
             db.collection("users").document(mParamUserId)
                     .set(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -447,8 +477,6 @@ public class EditProfileFragment extends Fragment {
                     });
 
         }else{
-            mNameField.setError(getActivity().getString(R.string.required));
-            mEmailField.setError(getActivity().getString(R.string.email_is_not_valid));
             Log.d(TAG, "Both are empty");
             Toast.makeText(getActivity(), R.string.empty_email_name,
                     Toast.LENGTH_LONG).show();
@@ -460,38 +488,48 @@ public class EditProfileFragment extends Fragment {
 
     private void uploadAvatar() {
         sname = mNameField.getText().toString().trim();
-        StorageReference avatarRef = mStorageRef.child("images")
-                .child("avatars")
-                .child(mParamUserId)
-                //.child(sPhotoResultUri.getLastPathSegment());
-                .child(sname);
-        Uri storageUploadUri; // to determine wither to upload sPhotoResultUri or mParamPhotoUrl
-        if(sPhotoResultUri != null){
-            storageUploadUri = sPhotoResultUri;
-        }else{
-            return;
-        }
-        avatarRef.putFile(storageUploadUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Log.d(TAG, "uploadFromUri:onSuccess");
-                        // Get a URL to the uploaded content
-                        Uri downloadUri = taskSnapshot.getDownloadUrl();
-                        Log.d(TAG, "downloadUrl on uploadAvatar= "+ downloadUri);
-                        submitProfile(downloadUri);
+       /* if (sname.isEmpty()){
+            sname = "Default";
+        }*/
+       if(FirebaseUtils.isValidName(sname) && FirebaseUtils.isValidEmail(sEmail) ){ // to make sure sname is not empty
+           StorageReference avatarRef = mStorageRef.child("images")
+                   .child("avatars")
+                   .child(mParamUserId)
+                   //.child(sPhotoResultUri.getLastPathSegment());
+                   .child(sname);
+           Uri storageUploadUri; // to determine wither to upload sPhotoResultUri or mParamPhotoUrl
+           if(sPhotoResultUri != null){
+               storageUploadUri = sPhotoResultUri;
+           }else{
+               return;
+           }
+           avatarRef.putFile(storageUploadUri)
+                   .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                       @Override
+                       public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                           Log.d(TAG, "uploadFromUri:onSuccess");
+                           // Get a URL to the uploaded content
+                           Uri downloadUri = taskSnapshot.getDownloadUrl();
+                           Log.d(TAG, "downloadUrl on uploadAvatar= "+ downloadUri);
+                           submitProfile(downloadUri);
                         /*if(downloadUrl != null){
                             mUsersRef.child(mParamUserId).child("avatar").setValue(downloadUrl.toString());
                         }*/
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        Log.w(TAG, "uploadFromUri:onFailure", exception);
-                    }
-                });
+                       }
+                   })
+                   .addOnFailureListener(new OnFailureListener() {
+                       @Override
+                       public void onFailure(@NonNull Exception exception) {
+                           // Handle unsuccessful uploads
+                           Log.w(TAG, "uploadFromUri:onFailure", exception);
+                       }
+                   });
+       }else{
+           mProgress.dismiss();
+           Toast.makeText(getActivity(), R.string.empty_email_name,
+                   Toast.LENGTH_LONG).show();
+       }
+
     }
 
     private void selectMedia() {
