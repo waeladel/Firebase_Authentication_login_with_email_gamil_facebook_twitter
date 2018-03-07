@@ -19,6 +19,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.getin.car.R;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
+import com.getin.car.fragments.PostFragment;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -30,7 +31,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 //import com.twitter.sdk.android.Twitter;
 
-public class TripsActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener, EditProfileFragment.OnFragmentInteractionListener{
+public class TripsActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener
+        , EditProfileFragment.OnFragmentInteractionListener
+        , PostFragment.OnFragmentInteractionListener{
 
     private final static String TAG = TripsActivity.class.getSimpleName();
     private static final int REQUEST_INVITE = 13;
@@ -71,15 +74,16 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
 
-                /*completeProfileFrag  = new CompleteProfileFragment();
-                //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
-                FragmentTransaction completeTransaction =fragmentManager.beginTransaction();
-                completeTransaction.add(R.id.content_profile, completeProfileFrag,"completeProfileFrag");
-                //completeTransaction.addToBackStack("CompleteProfileClicked");
-                completeTransaction.commit();*/
+                if(fragmentManager.findFragmentByTag("PostFrag") == null){ // to create only one instant of postFrag
+                    PostFragment PostFrag  = new PostFragment();
+                    //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
+                    FragmentTransaction PostTransaction =fragmentManager.beginTransaction();
+                    PostTransaction.add(R.id.content_profile, PostFrag,"PostFrag");
+                    PostTransaction.addToBackStack("Post");
+                    PostTransaction.commit();
+                }
+
             }
         });
 

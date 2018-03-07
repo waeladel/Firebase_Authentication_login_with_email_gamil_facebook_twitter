@@ -19,8 +19,6 @@
     <string name="female">Female</string>
 
 
-
-
     <!-- Warning messages and Toast -->
     <string name="auth_failed">Login Failed</string>
     <string name="error">An error occurred</string>
@@ -52,7 +50,7 @@
     <string name="invitation_title">Suggest to friends</string>
     <string name="invitation_message">Hi! this app is great</string>
     <string name="invitation_deep_link" translatable="false">https://hrnm2.app.goo.gl/parchut</string>
-    <string name="invitation_custom_image" >https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png</string>
+    <string name="invitation_custom_image">https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png</string>
     <string name="invitation_cta">Install</string>
     <string name="invitation_failed">Sorry, we couldn\'t sent the invitation to your friends.</string>
     <string name="google_play_services_error">Connection failed.</string>
