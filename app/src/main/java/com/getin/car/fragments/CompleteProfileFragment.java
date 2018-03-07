@@ -176,6 +176,10 @@ public class CompleteProfileFragment extends Fragment {
                 String EditableName = editable.toString().trim();
                 if(TextUtils.isEmpty(EditableName)){
                     mNameField.setError(getActivity().getString(R.string.required));
+                }else if(!TextUtils.isEmpty(EditableName)&& !FirebaseUtils.isValidName(EditableName)){
+                    mNameField.setError(getActivity().getString(R.string.name_must_be_two));
+                }else{
+                    mNameField.setError(null);
                 }
             }
             @Override
@@ -203,6 +207,8 @@ public class CompleteProfileFragment extends Fragment {
                     mEmailField.setError(getActivity().getString(R.string.required));
                 }else if(!TextUtils.isEmpty(EditableEmail)&& !FirebaseUtils.isValidEmail(EditableEmail)){
                     mEmailField.setError(getActivity().getString(R.string.email_is_not_valid));
+                }else{
+                    mEmailField.setError(null);
                 }
             }
             @Override
@@ -377,23 +383,25 @@ public class CompleteProfileFragment extends Fragment {
         sEmail = mEmailField.getText().toString().trim();
 
         Log.d(TAG, "CROP_PICTURE_sPhotoResultUri ="+ sPhotoResultUri);
+        Map<String, Object> user = new HashMap<>();
+
+        if(downloadUri != null){
+            //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
+            user.put("avatar", downloadUri.toString());
+        }else if(mParamPhotoUrl != null){
+            user.put("avatar", mParamPhotoUrl.toString());
+        }else{
+            //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
+            user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
+        }
 
         if(FirebaseUtils.isValidEmail(sEmail) && FirebaseUtils.isValidName(sname)){
 
-            Map<String, Object> user = new HashMap<>();
             /*mUsersRef.child(mParamUserId).child("name").setValue(sname);
             mUsersRef.child(mParamUserId).child("email").setValue(sEmail);*/
             user.put("name", sname);
             user.put("email", sEmail);
-            if(downloadUri != null){
-                //Log.d(TAG, "downloadUrl on avatarUri= " + "downloadUrl: "+downloadUrl);
-                user.put("avatar", downloadUri.toString());
-            }else if(mParamPhotoUrl != null){
-                user.put("avatar", mParamPhotoUrl.toString());
-            }else{
-                //mUsersRef.child(mParamUserId).child("avatar").setValue("https://firebasestorage.googleapis.com/v0/b/get-in-3dac6.appspot.com/o/images%2Favatars%2Fdefult_avatar.png?alt=media&token=fba62476-b1ec-4333-9409-b29f671ff241");
-                user.put("avatar", "https://firebasestorage.googleapis.com/v0/b/parchut-app.appspot.com/o/images%2Favatars%2FDefault%2Fdefult_avatar.png?alt=media&token=86b38cac-96ed-4f89-94dd-eb114c92f4e6");
-            }
+
             db.collection("users").document(mParamUserId)
                     .set(user)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -411,8 +419,6 @@ public class CompleteProfileFragment extends Fragment {
                     });
 
         }else{
-            mNameField.setError(getActivity().getString(R.string.required));
-            mEmailField.setError(getActivity().getString(R.string.email_is_not_valid));
             Log.d(TAG, "Both are empty");
             Toast.makeText(getActivity(), R.string.empty_email_name,
                     Toast.LENGTH_LONG).show();
@@ -424,7 +430,8 @@ public class CompleteProfileFragment extends Fragment {
 
     private void uploadAvatar() {
         sname = mNameField.getText().toString().trim();
-        StorageReference avatarRef = mStorageRef.child("images")
+        if(FirebaseUtils.isValidName(sname) && FirebaseUtils.isValidEmail(sEmail) ){ // to make sure sname is not empty
+            StorageReference avatarRef = mStorageRef.child("images")
                 .child("avatars")
                 .child(mParamUserId)
                 //.child(sPhotoResultUri.getLastPathSegment());
@@ -456,6 +463,12 @@ public class CompleteProfileFragment extends Fragment {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
                     }
                 });
+        }else{
+            mProgress.dismiss();
+            Toast.makeText(getActivity(), R.string.empty_email_name,
+                    Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void selectMedia() {
