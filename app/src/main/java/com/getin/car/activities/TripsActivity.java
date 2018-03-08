@@ -75,14 +75,19 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
             @Override
             public void onClick(View view) {
 
-                if(fragmentManager.findFragmentByTag("PostFrag") == null){ // to create only one instant of postFrag
+                /*if(fragmentManager.findFragmentByTag("PostFrag") == null){ // to create only one instant of postFrag
                     PostFragment PostFrag  = new PostFragment();
                     //fragmentManager.beginTransaction().replace(R.id.content_main, mRegisterFragment,"mRegisterFragment").commit();
                     FragmentTransaction PostTransaction =fragmentManager.beginTransaction();
                     PostTransaction.add(R.id.content_profile, PostFrag,"PostFrag");
                     PostTransaction.addToBackStack("PostFrag");
                     PostTransaction.commit();
-                }
+                }*/
+                Intent mIntent = new Intent(TripsActivity.this, PostActivity.class);
+                //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(mIntent);
+                //finish();
 
             }
         });
