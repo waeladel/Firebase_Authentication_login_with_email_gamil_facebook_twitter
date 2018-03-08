@@ -35,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.rengwuxian.materialedittext.MaterialEditText;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yanzhenjie.album.Action;
 import com.yanzhenjie.album.Album;
@@ -79,8 +80,8 @@ public class CompleteProfileFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private EditText mNameField;
-    private EditText mEmailField;
+    private MaterialEditText mNameField;
+    private MaterialEditText mEmailField;
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
     private ImageButton mGallerySelectButton;
@@ -165,7 +166,7 @@ public class CompleteProfileFragment extends Fragment {
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
         Log.d(TAG, "onCreateView savedInstanceState= "+ savedInstanceState);
 
-        mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
+        mNameField = (MaterialEditText)fragView.findViewById(R.id.edit_name_editText);
         if(mParamDisplayName != null){
             mNameField.setText(mParamDisplayName);
         }
@@ -193,7 +194,7 @@ public class CompleteProfileFragment extends Fragment {
             }
         });
 
-        mEmailField = (EditText)fragView.findViewById(R.id.edit_email_editText);
+        mEmailField = (MaterialEditText)fragView.findViewById(R.id.edit_email_editText);
         if(mParamEmail != null){
             mEmailField.setText(mParamEmail);
         }
@@ -443,6 +444,8 @@ public class CompleteProfileFragment extends Fragment {
 
     private void uploadAvatar() {
         sname = mNameField.getText().toString().trim();
+        sEmail = mEmailField.getText().toString().trim();
+
         if(FirebaseUtils.isValidName(sname) && FirebaseUtils.isValidEmail(sEmail) ){ // to make sure sname is not empty
             StorageReference avatarRef = mStorageRef.child("images")
                 .child("avatars")

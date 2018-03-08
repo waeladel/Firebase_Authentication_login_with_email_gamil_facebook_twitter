@@ -57,6 +57,8 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:4.6.1' // glide for image display
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1' // glide for image display
 
+    compile 'com.rengwuxian.materialedittext:library:2.1.4'// edit text with floating labale
+
 }
 
 

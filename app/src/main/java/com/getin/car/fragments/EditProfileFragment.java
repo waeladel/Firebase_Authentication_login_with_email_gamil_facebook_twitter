@@ -41,6 +41,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.rengwuxian.materialedittext.MaterialEditText;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yanzhenjie.album.Action;
 import com.yanzhenjie.album.Album;
@@ -77,8 +78,9 @@ public class EditProfileFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private EditText mNameField;
-    private EditText mEmailField;
+    private MaterialEditText mNameField;
+    private MaterialEditText mEmailField;
+
     private Button mSubmitButton;
     private ImageView mProfileImageButton;
     private ImageButton mGallerySelectButton;
@@ -145,8 +147,8 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View fragView = inflater.inflate(R.layout.fragment_complete_profile, container, false);
 
-        mNameField = (EditText)fragView.findViewById(R.id.edit_name_editText);
-        mEmailField = (EditText)fragView.findViewById(R.id.edit_email_editText);
+        mNameField = (MaterialEditText)fragView.findViewById(R.id.edit_name_editText);
+        mEmailField = (MaterialEditText)fragView.findViewById(R.id.edit_email_editText);
 
         mProfileImageButton = (ImageView)fragView.findViewById(R.id.profile_image_btn);
         mGallerySelectButton = (ImageButton)fragView.findViewById(R.id.select_image_btn);
@@ -488,7 +490,8 @@ public class EditProfileFragment extends Fragment {
 
     private void uploadAvatar() {
         sname = mNameField.getText().toString().trim();
-       /* if (sname.isEmpty()){
+        sEmail = mEmailField.getText().toString().trim();
+        /* if (sname.isEmpty()){
             sname = "Default";
         }*/
        if(FirebaseUtils.isValidName(sname) && FirebaseUtils.isValidEmail(sEmail) ){ // to make sure sname is not empty
