@@ -2,17 +2,24 @@ package com.getin.car.activities;
 
 import android.app.Dialog;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.getin.car.Manifest;
 import com.getin.car.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -48,6 +55,9 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private static final int MY_PERMISSION_REQUEST_CODE = 7000;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 7001;
+    public static final int EXPLAIN_READ_EXTERNAL_STORAGE = 7;
+    public static final int PERMISSION_NOT_GRANTED = 8;
+    private static final int EXPLAIN_LOCATION_PERMISSION = 9;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -79,8 +89,16 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isGooglePlayServicesAvailable();
+    }
+
     // get last location once
     private void getLastLocation() {
+
+        Log.d(TAG, "getLastLocation is on");
 
         if(checkPermissions() && isGooglePlayServicesAvailable()){
             mFusedLocationClient = getFusedLocationProviderClient(this);
@@ -140,7 +158,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
             return;
         }*/
-        if (checkPermissions() && isGooglePlayServicesAvailable()){
+        if (isGooglePlayServicesAvailable()){
             final double latitude = LastLocation.getLatitude();
             final double longitude = LastLocation.getLongitude();
 
@@ -176,17 +194,45 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void requestPermissions() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION},
-                MY_PERMISSION_REQUEST_CODE);
+
+        // Permission has not been granted and must be requested.
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION ) || ActivityCompat.shouldShowRequestPermissionRationale(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // Display a SnackBar with cda button to request the missing permission.
+            showMaterialDialog(EXPLAIN_LOCATION_PERMISSION);
+
+            /*Snackbar.make(findViewById(R.id.map), R.string.location_access_required,
+                    Snackbar.LENGTH_INDEFINITE).setAction(R.string.ok, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Request the permission
+                    ActivityCompat.requestPermissions(PostActivity.this,
+                            new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    android.Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSION_REQUEST_CODE);
+                }
+            }).show();*/
+
+        } else {
+            // No explanation needed; request the permission
+            //Snackbar.make(findViewById(R.id.map), R.string.location_unavailable, Snackbar.LENGTH_SHORT).show();
+            // Request the permission. The result will be received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                            android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSION_REQUEST_CODE);
+        }
+
     }
 
     private boolean isGooglePlayServicesAvailable() {
         // Check that Google Play services is available
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int resultCode = googleAPI.isGooglePlayServicesAvailable(this);
-        // If Google Play services is available
+        // If Google Play services is not available
         if(resultCode != ConnectionResult.SUCCESS) {
             if(googleAPI.isUserResolvableError(resultCode)) {
                 googleAPI.getErrorDialog(this, resultCode,
@@ -197,6 +243,48 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Log.d(TAG, "Google Play services is available.");
         return true;
+    }
+
+    private void showMaterialDialog(int id) {
+        switch (id) {
+            case PERMISSION_NOT_GRANTED:
+                new MaterialDialog.Builder(this)
+                        .title(R.string.permission_not_granted_title)
+                        .content(R.string.permission_not_granted)
+                        .positiveText(R.string.ok)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(MaterialDialog dialog, DialogAction which) {
+                                dialog.dismiss();                            }
+                        })
+                        .show();
+                break;
+            case EXPLAIN_LOCATION_PERMISSION:
+                new MaterialDialog.Builder(this)
+                        .title(R.string.access_location)
+                        .content(R.string.location_access_required)
+                        .positiveText(R.string.grant)
+                        .negativeText(R.string.cancel)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(MaterialDialog dialog, DialogAction which) {
+                                dialog.dismiss();
+                                // Request the permission
+                                ActivityCompat.requestPermissions(PostActivity.this,
+                                        new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                                                android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSION_REQUEST_CODE);
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(MaterialDialog dialog, DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+                break;
+        }
     }
 
 
@@ -272,10 +360,10 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         switch (requestCode) {
             case MY_PERMISSION_REQUEST_CODE: {
+                Log.d(TAG, "onRequestPermissionsResult: grantResults.length= "+grantResults.length
+                +"grantResults= "+ grantResults[0]);
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -290,9 +378,10 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    Toast.makeText(PostActivity.this, R.string.permission_denied, Toast.LENGTH_LONG).show();
+                    showMaterialDialog(PERMISSION_NOT_GRANTED);
+                    //Toast.makeText(PostActivity.this, R.string.permission_denied, Toast.LENGTH_LONG).show();
                 }
-                return;
+                break;
             }
 
         }

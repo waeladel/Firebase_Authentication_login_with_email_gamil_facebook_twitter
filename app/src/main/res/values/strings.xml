@@ -17,7 +17,9 @@
     <string name="submit_btn">Submit</string>
     <string name="male">Male</string>
     <string name="female">Female</string>
-
+    <string name="ok">OK</string>
+    <string name="grant">Grant</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Warning messages and Toast -->
     <string name="auth_failed">Login Failed</string>
@@ -34,7 +36,12 @@
     <string name="name_must_be_two">Name must be 2 characters at least</string>
     <string name="submit_profile_error">Sorry, couldn\'t submit your profile.</string>
     <string name="me">Me</string>
-    <string name="permission_denied">Permission denied to get your current location</string>
+    <string name="permission_denied">Permission to get your current location denied</string>
+    <string name="location_access_required">Location access is required to determine a starting point.</string>
+    <string name="access_location">Current location access</string>
+    <string name="location_unavailable">Permission denied.</string>
+    <string name="permission_not_granted">We are sorry, we cannot access this feature until you grant us permission.</string>
+    <string name="permission_not_granted_title">Permission not granted</string>
 
     <!-- Warning messages and Toast -->
 

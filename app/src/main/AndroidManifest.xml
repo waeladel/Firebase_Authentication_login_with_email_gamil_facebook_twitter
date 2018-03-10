@@ -26,6 +26,8 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--android:name=".App"
+    android:name="android.support.multidex.MultiDexApplication"-->
 
     <application
         android:name=".App"

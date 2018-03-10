@@ -2,12 +2,14 @@ package com.getin.car;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 
 /**
  * Created on 25/03/2017.
  */
 
-public class App extends Application {
+//public class App extends Application {// to enable multidex
+public class App extends MultiDexApplication {
 
     private static Context sApplicationContext;
 
