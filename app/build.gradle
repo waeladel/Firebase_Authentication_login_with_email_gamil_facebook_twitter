@@ -45,6 +45,8 @@ dependencies {
     compile 'com.google.firebase:firebase-invites:11.8.0' // Firebase invite
     compile 'com.google.android.gms:play-services-maps:11.8.0'
     compile "com.google.android.gms:play-services-location:11.8.0"
+    compile "com.google.android.gms:play-services-places:11.8.0"
+    compile 'com.github.jd-alexander:library:1.1.0'// to get routes easily
     compile 'com.google.android.gms:play-services-auth:11.8.0' // Google Sign In SDK (Google Sign In)
     compile 'com.facebook.android:facebook-android-sdk:4.27.0' // Facebook Android SDK (for Facebook Login)
     compile('com.twitter.sdk.android:twitter:3.1.1@aar') { // Twitter Android SDK (for Twitter Login)

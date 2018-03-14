@@ -20,6 +20,11 @@
     <string name="ok">OK</string>
     <string name="grant">Grant</string>
     <string name="cancel">Cancel</string>
+    <string name="origin">Starting Point</string>
+    <string name="destination">Destination</string>
+    <string name="current_location">Current location</string>
+
+
 
     <!-- Warning messages and Toast -->
     <string name="auth_failed">Login Failed</string>
@@ -42,6 +47,9 @@
     <string name="location_unavailable">Permission denied.</string>
     <string name="permission_not_granted">We are sorry, we cannot access this feature until you grant us permission.</string>
     <string name="permission_not_granted_title">Permission not granted</string>
+    <string name="route_error">Error: </string>
+    <string name="route_try_again">Something went wrong, Try again.</string>
+
 
     <!-- Warning messages and Toast -->
 
