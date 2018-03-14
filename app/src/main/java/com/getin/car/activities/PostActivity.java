@@ -42,6 +42,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.location.places.Place;
@@ -49,6 +50,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -91,13 +93,15 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker mOriginMarker;
     private Marker mDestinationMarker;
     private MarkerOptions mMarkerOptions;
+    private LatLngBounds mBounds;
     SupportMapFragment mapFragment;
 
     private static volatile LatLng mOrigin ;
     private static volatile LatLng mDestination ;
 
     private List<Polyline> polylines;
-    //private List<String> MarkersList;
+    private List<Marker> MarkersList;
+    private LatLngBounds.Builder mBoundBuilder;
 
     private static final int[] COLORS = new int[]{R.color.colorGreen,R.color.colorBlue,R.color.colorRed,R.color.colorAccent,R.color.primary_dark_material_light};
 
@@ -114,7 +118,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
         // Init view //
 
         polylines = new ArrayList<>();
-        //MarkersList = new ArrayList<>();
+        MarkersList = new ArrayList<>();
 
         autocompleteOrigin = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_origin);
@@ -315,6 +319,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 );
 
                 mOriginMarker.setTag("Origin");
+                MarkersList.add(mOriginMarker);// add marker to markers list to calculate bounds
 
                 break;
             case "Destination":
@@ -331,11 +336,24 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 );
 
                 mDestinationMarker.setTag("Destination");
-
+                MarkersList.add(mDestinationMarker);// add marker to markers list to calculate bounds
                 break;
-        }
+        }// end of switch
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlang,15.0f));
+        if (mOriginMarker != null && mDestinationMarker != null){
+            if (MarkersList.size() >= 2 ){
+                mBoundBuilder.include(mOriginMarker.getPosition());
+                mBoundBuilder.include(mDestinationMarker.getPosition());
+                mBounds = mBoundBuilder.build();
+            }
+            int width = getResources().getDisplayMetrics().widthPixels;
+            int padding = (int) (width * 0.15); // offset from edges of the map 10% of screen
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds, padding));
+
+        }else{
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlang,15.0f));
+        }
     }
 
     private void getRoutes(LatLng origin, LatLng destination) {
@@ -479,6 +497,8 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
             //startLocationUpdates();
 
         }
+
+        mBoundBuilder = new LatLngBounds.Builder();
 
         // Add a marker in Sydney and move the camera
         /*LatLng sydney = new LatLng(-34, 151);
