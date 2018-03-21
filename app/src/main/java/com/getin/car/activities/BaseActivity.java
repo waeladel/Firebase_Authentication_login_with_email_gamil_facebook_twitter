@@ -10,10 +10,12 @@ import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.getin.car.R;
+import com.getin.car.authentication.Trip;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.LoginFragment;
 import com.getin.car.fragments.RegisterFragment;
+import com.getin.car.fragments.TripInfoFragment;
 import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -41,6 +43,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     public LoginFragment mLoginFragment;
     public CompleteProfileFragment completeProfileFrag;
     public EditProfileFragment editProfileFragment;
+    public TripInfoFragment tripInfoFragment;
+
     //List<Fragment> fragmentsList;
 
     public ProgressDialog mProgress;
@@ -63,6 +67,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     //public DatabaseReference UsersRef;
     //public DocumentReference UserDocRef ;
     public CollectionReference usersColRef;
+    public static Trip trip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +96,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                 .build();
         Log.d(TAG, "gso requestIdToken ="+ getString(R.string.default_web_client_id));*/
         // [END config_signin]
+
+        //create trip object
+        trip = new Trip();
 
         // [START google Clint]
         mGoogleApiClient = new GoogleApiClient.Builder(this)

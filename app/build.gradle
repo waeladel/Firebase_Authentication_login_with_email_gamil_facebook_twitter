@@ -30,39 +30,61 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    // Firebase core for analytics
+    //compile 'com.google.firebase:firebase-database:11.8.0' // Firebase database
+    // firestore database
+    // Firebase storage
+    //compile 'com.firebaseui:firebase-ui-database:3.2.2' // FirebaseUI Database only
+    //compile 'com.firebaseui:firebase-ui-storage:3.2.2'  // FirebaseUI Storage only
+    // FirebaseUI auth only
+    // Firebase Authentication
+    // Firebase invite
+    // to get routes easily
+    // Google Sign In SDK (Google Sign In)
+    // Facebook Android SDK (for Facebook Login)
+    compile('com.twitter.sdk.android:twitter:3.1.1@aar') {
+        // Twitter Android SDK (for Twitter Login)
+        transitive = true
+    }
+
+    // for image gallery
+    // Image Cropper
+    // glide for image display
+    // glide for image display
+
+    // edit text with floating labale
+    // to unable Multidex support
     compile 'com.android.support:appcompat-v7:27.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:27.1.0'
     compile 'com.android.support:support-v4:27.1.0'
-    compile 'com.google.firebase:firebase-core:11.8.0' // Firebase core for analytics
-    //compile 'com.google.firebase:firebase-database:11.8.0' // Firebase database
-    compile 'com.google.firebase:firebase-firestore:11.8.0' // firestore database
-    compile 'com.google.firebase:firebase-storage:11.8.0'  // Firebase storage
-    //compile 'com.firebaseui:firebase-ui-database:3.2.2' // FirebaseUI Database only
-    //compile 'com.firebaseui:firebase-ui-storage:3.2.2'  // FirebaseUI Storage only
-    compile 'com.firebaseui:firebase-ui-auth:3.2.2' // FirebaseUI auth only
-    compile 'com.google.firebase:firebase-auth:11.8.0' // Firebase Authentication
-    compile 'com.google.firebase:firebase-invites:11.8.0' // Firebase invite
+    compile 'com.google.firebase:firebase-core:11.8.0'
+    compile 'com.google.firebase:firebase-firestore:11.8.0'
+    compile 'com.google.firebase:firebase-storage:11.8.0'
+    compile 'com.firebaseui:firebase-ui-auth:3.2.2'
+    compile 'com.google.firebase:firebase-auth:11.8.0'
+    compile 'com.google.firebase:firebase-invites:11.8.0'
     compile 'com.google.android.gms:play-services-maps:11.8.0'
-    compile "com.google.android.gms:play-services-location:11.8.0"
-    compile "com.google.android.gms:play-services-places:11.8.0"
-    compile 'com.github.jd-alexander:library:1.1.0'// to get routes easily
-    compile 'com.google.android.gms:play-services-auth:11.8.0' // Google Sign In SDK (Google Sign In)
-    compile 'com.facebook.android:facebook-android-sdk:4.27.0' // Facebook Android SDK (for Facebook Login)
-    compile('com.twitter.sdk.android:twitter:3.1.1@aar') { // Twitter Android SDK (for Twitter Login)
-        transitive = true
-    }
-
-    testCompile 'junit:junit:4.12'
-    compile 'com.yanzhenjie:album:2.0.2'// for image gallery
-    compile 'com.theartofdev.edmodo:android-image-cropper:2.6.0' // Image Cropper
-    compile 'com.github.bumptech.glide:glide:4.6.1' // glide for image display
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1' // glide for image display
-
-    compile 'com.rengwuxian.materialedittext:library:2.1.4'// edit text with floating labale
-    compile 'com.android.support:multidex:1.0.1'// to unable Multidex support
+    compile 'com.google.android.gms:play-services-location:11.8.0'
+    compile 'com.google.android.gms:play-services-places:11.8.0'
+    compile 'com.github.jd-alexander:library:1.1.0'
+    compile 'com.google.android.gms:play-services-auth:11.8.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.27.0'
+    compile 'com.yanzhenjie:album:2.0.2'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
+    compile 'com.github.bumptech.glide:glide:4.6.1'
+    compile 'com.rengwuxian.materialedittext:library:2.1.4'
+    compile 'com.android.support:multidex:1.0.1'
     compile 'com.afollestad.material-dialogs:core:0.9.6.0'
+    compile 'com.wdullaer:materialdatetimepicker:3.5.1'
+    compile 'com.android.support:support-v13:27.1.0'
+    testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
+    compile 'com.android.volley:volley:1.1.0'
+
 }
+
+
 
 
 apply plugin: 'com.google.gms.google-services'

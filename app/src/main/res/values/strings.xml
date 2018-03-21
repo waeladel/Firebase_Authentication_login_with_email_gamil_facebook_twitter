@@ -23,7 +23,49 @@
     <string name="origin">Starting Point</string>
     <string name="destination">Destination</string>
     <string name="current_location">Current location</string>
-
+    <string name="trip_info_btn">Add Trip Info</string>
+    <string name="add_rules">Add rules</string>
+    <string name="post">Post</string>
+    <string name="gender">Gender:</string>
+    <string name="chat">Chatting:</string>
+    <string name="allowed">Allowed</string>
+    <string name="not_allowed">Not allowed</string>
+    <string name="welcomed">Welcomed</string>
+    <string name="not_welcomed">Not welcomed</string>
+    <string name="cursing">Cursing:</string>
+    <string name="smoking">Smoking:</string>
+    <string name="driving_style">Driving style:</string>
+    <string name="music">Music:</string>
+    <string name="disabled">Disabled</string>
+    <string name="set_trip_info">Set Trip Info</string>
+    <string name="time">Starting Time</string>
+    <string name="date">Date</string>
+    <string name="none">None</string>
+    <string name="label">Label</string>
+    <string name="label_text">From %1$s to %2$s</string>
+    <string name="post_label">Post label</string>
+    <string name="label_hint">Ex: From Eiffel Tower to Moulin Rouge</string>
+    <string name="route_details">Route details</string>
+    <string name="details_hint">Your route steps</string>
+    <string name="seats_hint">The number of vacant seats</string>
+    <string name="seats">Available seats</string>
+    <string name="transportation_dialogue_title">Transportation Type</string>
+    <string name="transportation_model_hint">Ex: BMW, Honda, Ford</string>
+    <string name="transportation_service_hint">Ex: Uber, Lyft, Careem, Gett</string>
+    <string name="transportation_service_title">Service:</string>
+    <string name="transportation_boat_hint">Ex: Yacht, Motorboat, Jet Ski </string>
+    <string name="transportation_texi_hint">Ex: Public, Limousine , Airport </string>
+    <string name="transportation_Bus_hint">Ex: Bus, Minibus, Truck </string>
+    <string name="music_genre_hint">Ex: Rock, Pop, Jazz</string>
+    <string name="type_title">Type:</string>
+    <string name="model_title">Model:</string>
+    <string name="genre_title">Favorite genres:</string>
+    <string name="music_tolerance">Tolerance:</string>
+    <string name="music_dialogue_title">Music Tolerance</string>
+    <string name="cost_dialogue_title">Trip cost</string>
+    <string name="cost_editText_hint">Cost that will be divided between participants</string>
+    <string name="cost_floatingLabel">Local currency</string>
+    <string name="distance_duration">Distance = %1$d Km | duration = %2$s</string>
 
 
     <!-- Warning messages and Toast -->
@@ -48,18 +90,15 @@
     <string name="permission_not_granted">We are sorry, we cannot access this feature until you grant us permission.</string>
     <string name="permission_not_granted_title">Permission not granted</string>
     <string name="route_error">Error: </string>
-    <string name="route_try_again">Something went wrong, Try again.</string>
+    <string name="route_try_again">Something went wrong, try again.</string>
+    <string name="add_successfully">Your post has been added successfully.</string>
 
+    <string name="loading">Loading</string>
+    <string name="please_wait">Please wait</string>
 
     <!-- Warning messages and Toast -->
 
     <string name="title_activity_profile">Profile</string>
-    <string name="fb_login_protocol_scheme">fb1010966069035103</string>
-    <string name="facebook_application_id">1010966069035103</string>
-    <!--<string name="facebook_app_id">1010966069035103</string>-->
-    <string name="twitter_consumer_key">zBUOm8rwVU0C0Jt5hsVICL34S</string>
-    <string name="twitter_consumer_secret">oPxbLoDfldOxpS0e6LrT2wBh2rmbcLJePFlD9ASkgLNTnX1Q3H</string>
-
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
@@ -86,5 +125,62 @@
     <string name="invitation_id_default">Invitation ID not set</string>
     <string name="title_activity_maps">Map</string>
     <!-- invite -->
+
+
+    <!-- Time -->
+
+    <string name="day">%d day</string>
+    <string name="days">%d days</string>
+    <string name="hour">%d hour</string>
+    <string name="hours">%d hours</string>
+    <string name="minute">%d minute</string>
+    <string name="minutes">%d minutes</string>
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="dow_sun_short">Su</string>
+    <string name="dow_mon_short">Mo</string>
+    <string name="dow_tue_short">Tu</string>
+    <string name="dow_wed_short">We</string>
+    <string name="dow_thu_short">Th</string>
+    <string name="dow_fri_short">Fr</string>
+    <string name="dow_sat_short">Sa</string>
+    <string name="dow_sun">Sunday</string>
+    <string name="dow_mon">Monday</string>
+    <string name="dow_tue">Tuesday</string>
+    <string name="dow_wed">Wednesday</string>
+    <string name="dow_thu">Thursday</string>
+    <string name="dow_fri">Friday</string>
+    <string name="dow_sat">Saturday</string>
+    <string name="no_repeats">No repeats</string>
+    <string name="everyday">Every day</string>
+    <string name="weekdays">Weekdays</string>
+    <string name="weekends">Weekends</string>
+    <!-- Time -->
+
+    <!-- Transportation type array -->
+    <string name="private_car">Private car</string>
+    <string name="ride_sharing">Ride sharing service</string>
+    <string name="taxi">Taxi</string>
+    <string name="motorcycle">Motorcycle</string>
+    <string name="bus">Bus</string>
+    <string name="boat">Boat</string>
+    <!-- Transportation type array -->
+
+    <!-- gender array -->
+    <string name="any">Any</string>
+    <string name="females">Females only</string>
+    <string name="males">Males only</string>
+    <!-- gender type array -->
+
+    <!-- music array -->
+    <string name="no_music">No Music</string>
+    <string name="driver">My playlist only</string>
+    <string name="passenger">Passenger\'s playlist allowed</string>
+    <!-- music array -->
+
+    <!-- driving array -->
+    <string name="safe_driving">Safe driving</string>
+    <string name="rash_driving">Rash driving</string>
+    <!-- driving array -->
 
 </resources>

@@ -1,6 +1,7 @@
 package com.getin.car.activities;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -13,13 +14,22 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
 import com.directions.route.RouteException;
@@ -27,6 +37,10 @@ import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
 import com.getin.car.Manifest;
 import com.getin.car.R;
+import com.getin.car.authentication.PolyUtil;
+import com.getin.car.fragments.EditProfileFragment;
+import com.getin.car.fragments.TripInfoFragment;
+import com.getin.car.fragments.TripRulesFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.ErrorDialogFragment;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -55,18 +69,36 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import android.support.v4.app.FragmentManager;
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
+import static com.getin.car.activities.BaseActivity.trip;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class PostActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        RoutingListener {
+        RoutingListener,
+        TripInfoFragment.OnFragmentInteractionListener,
+        TripRulesFragment.OnFragmentInteractionListener{
 
     private final static String TAG = PostActivity.class.getSimpleName();
 
@@ -98,12 +130,36 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static volatile LatLng mOrigin ;
     private static volatile LatLng mDestination ;
+    private static volatile String encodedPoly;
+    private static volatile String mOriginName;
+    private static volatile String mOriginAddress;
+    private static volatile String mDestinationName;
+    private static volatile String mDestinationAddress;
+
 
     private List<Polyline> polylines;
     private List<Marker> MarkersList;
+    private List<Integer> distances;
+    private List<Integer> durations;
+
     private LatLngBounds.Builder mBoundBuilder;
 
-    private static final int[] COLORS = new int[]{R.color.colorGreen,R.color.colorBlue,R.color.colorRed,R.color.colorAccent,R.color.primary_dark_material_light};
+    private Button mTripInfoButton;
+    private TripInfoFragment tripInfoFragment;
+    private TripRulesFragment tripRulesFragment;
+    // Get FragmentManager
+    public FragmentManager fragmentManager;
+
+    //initialize the FirebaseAuth instance
+    public static FirebaseAuth mAuth;
+    public static FirebaseAuth.AuthStateListener mAuthListener;
+
+    //initialize the Firebase Database
+    private FirebaseFirestore db;
+
+    private RequestQueue requestQueue;
+
+    //private static final int[] COLORS = new int[]{R.color.colorGreen,R.color.colorBlue,R.color.colorRed,R.color.colorAccent,R.color.primary_dark_material_light};
 
 
     @Override
@@ -114,11 +170,46 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        // Init view //
-
         polylines = new ArrayList<>();
         MarkersList = new ArrayList<>();
+        distances = new ArrayList<Integer>();// to add the distance of all poly
+        durations = new ArrayList<Integer>();
+        fragmentManager = getSupportFragmentManager();
+
+        requestQueue = Volley.newRequestQueue(this);
+
+        // Init view //
+        mTripInfoButton = findViewById(R.id.trip_info_btn);
+
+        mTripInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "mTripInfoButton clicked ");
+                if(mOrigin !=  null && mDestination != null && encodedPoly != null){
+                    trip.setOrigin(latLngToGeoPoint(mOrigin));
+                    trip.setDestination(latLngToGeoPoint(mDestination));
+                    //trip.setPolyline(encodedPoly);
+                    Log.i(TAG, "mOrigin name: "+mOriginName + "mDestination name= "+ mDestinationName);
+                    Log.i(TAG, "mOrigin address: "+mOriginAddress + "mDestination address= "+ mDestinationAddress);
+                    Log.i(TAG, "setPolyline: "+encodedPoly);
+
+                    if(mOriginName != null || mOriginAddress != null){
+                        trip.setLabel(getString(R.string.label_text ,mOriginName, mDestinationName));
+                        trip.setDetails(getString(R.string.label_text ,mOriginAddress, mDestinationAddress));
+                    }else{
+                        geoCode(mOrigin, "currentLocation");// get address and set label and details
+                    }
+                }
+
+                Log.i(TAG, "get setDestination clicked,Origin= "+ trip.getOrigin()+"Destination= "+trip.getDestination()+"Polyline= "+trip.getPolyline());
+                tripInfoFragment  = TripInfoFragment.newInstance();//new EditProfileFrag();
+                FragmentTransaction tripInfoTransaction = fragmentManager.beginTransaction();
+                tripInfoTransaction.add(R.id.map_layout, tripInfoFragment,"tripInfoFrag");
+                tripInfoTransaction.addToBackStack("tripInfoFrag");
+                tripInfoTransaction.commit();
+
+            }
+        });
 
         autocompleteOrigin = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_origin);
@@ -136,6 +227,8 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "Place Locale: " + place.getLocale());
                 Log.i(TAG, "Place Attributions: " + place.getAttributions());
                 mOrigin = place.getLatLng();
+                mOriginName = place.getName().toString();
+                mOriginAddress = place.getAddress().toString();
 
                 displayMarker(mOrigin, "Origin");
 
@@ -167,6 +260,8 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "Place Locale: " + place.getLocale());
                 Log.i(TAG, "Place Attributions: " + place.getAttributions());
                 mDestination = place.getLatLng();
+                mDestinationName = place.getName().toString();
+                mDestinationAddress = place.getAddress().toString();
                 //displayMarker(mDestination, "Destination");
                 if (mOrigin != null && mDestination != null){
                     displayMarker(mDestination, "Destination");
@@ -176,8 +271,10 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                     if (mDestination != null){
                         LatLng currentOrigin = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
                         Log.i(TAG, "Place mLastLocation: " + currentOrigin);
-                        getRoutes(currentOrigin, mDestination);
+                        mOrigin = currentOrigin;
+                        getRoutes(mOrigin, mDestination);
                         displayMarker(mDestination, "Destination");
+                        geoCode(mOrigin, "Origin");
                     }
 
                 }
@@ -198,15 +295,148 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
         //startLocationUpdates();
         //displayLocation();
 
+        // Obtain the FirebaseDatabase instance.
+        db =  FirebaseFirestore.getInstance();
+
+        mAuth = FirebaseAuth.getInstance();
+
+        //initialize the AuthStateListener method
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Log.d(TAG, "onAuthStateChanged:signed_in_getDisplayName:" + user.getDisplayName());
+                    Log.d(TAG, "onAuthStateChanged:signed_in_getEmail():" + user.getEmail());
+                    Log.d(TAG, "onAuthStateChanged:signed_in_getPhotoUrl():" + user.getPhotoUrl());
+                    Log.d(TAG, "onAuthStateChanged:signed_in_emailVerified?:" + user.isEmailVerified());
+
+                    trip.setOwnerId(user.getUid());
+                    fetchUserData(user.getUid());
+
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                Log.d(TAG, "onAuthStateChanged:signed_out");
+
+            }
+        };
+
+    }//end of onCreate
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        Log.d(TAG, "MainActivity onStart");
     }
 
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "MainActivity onStop");
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
 
 
     @Override
     protected void onResume() {
         super.onResume();
         isGooglePlayServicesAvailable();
+    }
+
+    // To get titles and address for latlang
+    private void geoCode(LatLng point , final String markerTag) {
+        Log.d(TAG, "geoCode LatLng =" +point);
+        Log.d(TAG, "geoCode markerTag =" +markerTag);
+
+        String geoCodeingKey = getString(R.string.geocoding_key);
+        Log.d(TAG, "geoCodeingKey =" +geoCodeingKey);
+
+        String requestURL = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+
+                point.latitude+","+point.longitude+
+                "&key="+geoCodeingKey;
+
+        JsonObjectRequest request = new JsonObjectRequest(requestURL, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if(markerTag.equalsIgnoreCase("Destination")){
+                                mDestinationAddress = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                mDestinationName = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                autocompleteDestination.setText(mDestinationAddress);
+                                Log.d(TAG, "geoCode mDestinationAddress =" +mDestinationAddress);
+
+                            }else if(markerTag.equalsIgnoreCase("Origin")){
+                                mOriginAddress = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                mOriginName = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                autocompleteOrigin.setText(mOriginAddress);
+                                Log.d(TAG, "geoCode mOriginAddress =" +mOriginAddress);
+                            }else{
+                                mOriginAddress = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                mOriginName = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+                                trip.setLabel(getString(R.string.label_text ,mOriginName, mDestinationName));
+                                trip.setDetails(getString(R.string.label_text ,mOriginAddress, mDestinationAddress));
+                                Log.d(TAG, "geoCode mOriginAddress =" +mOriginAddress);
+                                Log.d(TAG, "geoCode mDestinationName =" +mDestinationName);
+                            }
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+                Log.e(TAG, "geoCode mOriginAddress =" +error.getMessage());
+
+            }
+        });
+
+        requestQueue.add(request);
+
+    }
+
+
+    //get current user name and profile
+    private void fetchUserData(String uid) {
+        DocumentReference docRef = db.collection("users").document(uid);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        String userName = document.getString("name");
+                        if(userName != null){
+                            trip.setOwnerName(userName);
+                        }
+
+                        String avatarUrl = document.getString("avatar");
+                        if (avatarUrl != null){
+                            trip.setOwnerPic(avatarUrl);
+                            Log.d(TAG, "DocumentSnapshot mProfileImageButton sAvatarUrl= " +avatarUrl);
+                        }
+
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    //listener.onFailed(task.getException());
+                }
+            }
+        });
     }
 
     // get last location once
@@ -311,7 +541,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
                 mOriginMarker = mMap.addMarker(new MarkerOptions()
                         .position(latlang)
-                        .title(getString(R.string.me))
+                        .title(getString(R.string.origin))
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_front_car_black))
                         .draggable(true)
                         .snippet("Kiel is cool")
@@ -328,7 +558,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 mDestinationMarker = mMap.addMarker(new MarkerOptions()
                         .position(latlang)
-                        .title(getString(R.string.me))
+                        .title(getString(R.string.destination))
                         //.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_front_car_black))
                         .draggable(true)
                         .snippet("Kiel is cool")
@@ -347,22 +577,38 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 mBounds = mBoundBuilder.build();
             }
             int width = getResources().getDisplayMetrics().widthPixels;
+            int height = getResources().getDisplayMetrics().heightPixels;
+            int autocomplete_height = findViewById(R.id.autocomplete_layout).getHeight();
+            int remainHeight = height - autocomplete_height;
+
+            Log.d(TAG, "autocomplete_height= "+autocomplete_height+"remainHeight= "+remainHeight );
+
+
             int padding = (int) (width * 0.15); // offset from edges of the map 10% of screen
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds, padding));
-
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(mBounds,width, remainHeight,  padding));
         }else{
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlang,15.0f));
         }
     }
 
+    private GeoPoint latLngToGeoPoint(LatLng latLng) {
+        GeoPoint geoPoint = new GeoPoint(latLng.latitude, latLng.longitude );
+        return geoPoint;
+    }
+
+
     private void getRoutes(LatLng origin, LatLng destination) {
+
+        String directionsKey = getString(R.string.directions_key);
+        Log.d(TAG, "directionsKey =" +directionsKey);
 
         Routing routing = new Routing.Builder()
                 .travelMode(AbstractRouting.TravelMode.DRIVING)
                 .withListener(this)
                 .alternativeRoutes(true)
                 .waypoints(origin, destination)
+                .key(directionsKey)
                 .build();
         routing.execute();
     }
@@ -524,14 +770,17 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                     switch (marker.getTag().toString()) {
                         case "Origin":
                             mOrigin = marker.getPosition();
-                            autocompleteOrigin.setText(marker.getPosition().toString());
+                            Log.d(TAG, "marker.getTitle:" + marker.getTitle());
+                            geoCode(mOrigin, "Origin");
+                            //autocompleteOrigin.setText(marker.getPosition().toString());
                             if (mOrigin != null && mDestination != null){
                                 getRoutes(mOrigin, mDestination);
                             }
                             break;
                         case "Destination":
                             mDestination = marker.getPosition();
-                            autocompleteDestination.setText(marker.getPosition().toString());
+                            geoCode(mDestination, "Destination");
+                            //autocompleteDestination.setText(marker.getPosition().toString());
                             if (mOrigin != null && mDestination != null){
                                 getRoutes(mOrigin, mDestination);
                             }
@@ -549,8 +798,8 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
             public void onPolylineClick(Polyline polyline) {
-                int strokeColor = polyline.getColor() ^ 0x0000CC00;
-                polyline.setColor(strokeColor);
+                /*int strokeColor = polyline.getColor() ^ 0x0000CC00;
+                polyline.setColor(strokeColor);*/
                 //polyline.getZIndex()
                 Log.i(TAG, "Polyline points @ " + polyline.getPoints());
                 Log.i(TAG, "Polyline getId @ " + polyline.getId());
@@ -561,11 +810,19 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                     polylines.get(i).setZIndex(0.0f);
                     polylines.get(i).setColor(ContextCompat.getColor(PostActivity.this, R.color.colorGrey));
 
-                    if (polyline.getId().equals(polylines.get(i).getId())){
+                    if (polyline.getId().equals(polylines.get(i).getId())){// this is the selected one
                         polyline.setZIndex(1.0f);
                         polyline.setColor(ContextCompat.getColor(PostActivity.this, R.color.colorAccent));
                         Log.i(TAG, "polyline setZIndex= " +polyline.getZIndex());
+                        encodedPoly = PolyUtil.encode(polyline.getPoints());
 
+                        Log.d(TAG, "distances.get(i)= " +distances.get(i));
+                        Log.d(TAG, "durations.get(i)= " +durations.get(i));
+                        Log.d(TAG, "durations size)= " +durations.size()+ "distances size= "+distances.size() );
+
+
+                        trip.setDistance(distances.get(i));
+                        trip.setDuration(durations.get(i));
                     }
                 }
                 //Toast.makeText(PostActivity.this, "Polyline klick: " + polyline.getPoints(), Toast.LENGTH_LONG).show();
@@ -655,6 +912,48 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    public void onFragmentInteraction(String fragName) {
+        Log.d(TAG, "mama helwa");
+        switch (fragName){
+            case "tripRulesFragment":
+                Log.i(TAG, "mama mTripInfoButton clicked ");
+
+                Log.i(TAG, "mama et setDestination clicked,Origin= "+ trip.getOrigin()+"Destination= "+trip.getDestination()+"Polyline= "+trip.getPolyline());
+                tripRulesFragment  = TripRulesFragment.newInstance();//new EditProfileFrag();
+                FragmentTransaction tripRulesTransaction = fragmentManager.beginTransaction();
+                tripRulesTransaction.add(R.id.map_layout, tripRulesFragment, "tripRulesFragment");
+                tripRulesTransaction.addToBackStack("tripRulesFragment");
+                tripRulesTransaction.commit();
+                break;
+
+            case "postTrip":
+                Log.d(TAG, "mama postTrip clicked ");
+                db.collection("trips")
+                        .add(trip)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                                Toast.makeText(PostActivity.this, R.string.add_successfully, Toast.LENGTH_SHORT).show();
+
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                                Toast.makeText(PostActivity.this, R.string.route_try_again, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                finish();
+                //fragmentManager.popBackStack("tripInfoFrag", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                break;
+
+        }
+
+    }
 
     //// Listener for routs ////////
 
@@ -683,6 +982,19 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
+        if(distances.size()>0 || durations.size()>0 ) {
+
+            for (int i = 0; i <distances.size(); i++) {
+                distances.remove(i);
+            }
+            for (int i = 0; i <durations.size(); i++) {
+                durations.remove(i);
+            }
+        }
+
+        distances = new ArrayList<Integer>();
+        durations = new ArrayList<Integer>();
+
         polylines = new ArrayList<>();
         //add route(s) to the map.
         for (int i = 0; i <route.size(); i++) {
@@ -696,6 +1008,24 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d(TAG,"shortest Route Index= "+shortestRouteIndex + "i+"+route.get(i).getDistanceValue());
                 polyOptions.color(ContextCompat.getColor(this,R.color.colorAccent));
                 polyOptions.zIndex(1.0f);
+                Log.d(TAG,"shortest Route getPolyline= "+ "Country"+route.get(i).getCountry()
+                        //+ " Polyline "+route.get(i).getPolyline()
+                        + " getDistanceValue "+route.get(i).getDistanceValue()
+                        + " getDistanceText "+route.get(i).getDistanceText()
+                        //+ " getEndAddressText "+route.get(i).getEndAddressText()
+                        + " getName "+route.get(i).getName()
+                        + " getLatLgnBounds "+route.get(i).getLatLgnBounds()
+                        + " getDistanceValue "+route.get(i).getDistanceValue()
+                        + " getDurationValue "+route.get(i).getDurationValue()
+                        + " getDistanceText "+route.get(i).getDistanceText()
+                        + " getDurationText "+route.get(i).getDurationText()
+                        + " getCountry "+route.get(i).getCountry());
+                trip.setDistance(route.get(i).getDistanceValue());
+                trip.setDuration(route.get(i).getDurationValue());
+
+                        //+ " getPoints "+route.get(i).getPoints()
+                        //+ " getSegments "+route.get(i).getSegments());
+                encodedPoly = PolyUtil.encode(route.get(i).getPoints());
             }else{
                 polyOptions.color(ContextCompat.getColor(this,R.color.colorGrey));
             }
@@ -704,6 +1034,10 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
             polyOptions.addAll(route.get(i).getPoints());
             Polyline polyline = mMap.addPolyline(polyOptions);
             polylines.add(polyline);
+
+            // to add the distance of all poly
+            distances.add(route.get(i).getDistanceValue());
+            durations.add(route.get(i).getDurationValue());
 
             Log.d(TAG,"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue());
             Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
@@ -716,5 +1050,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
     public void onRoutingCancelled() {
         Log.i(TAG, "Routing was cancelled.");
     }
+
+
 }
 
