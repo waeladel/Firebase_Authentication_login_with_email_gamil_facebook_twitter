@@ -4,19 +4,27 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.getin.car.R;
+import com.getin.car.authentication.Trip;
+import com.getin.car.authentication.TripsListAdapter;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.PostFragment;
@@ -25,10 +33,23 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+
+
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
+import static com.google.firebase.firestore.DocumentChange.Type.ADDED;
 //import com.twitter.sdk.android.Twitter;
 
 public class TripsActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener
@@ -48,8 +69,16 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
     public Uri currentUserPhoto;
     public Boolean currentUserVerified;
     public boolean userExist;
-    public Button button2;
 
+    private RecyclerView mTripsRecycler;
+    private List<Trip> mTripsArrayList;
+    private TripsListAdapter tripsListAdapter;
+
+    //initialize the Firebase Database
+    private FirebaseFirestore db;
+    private CollectionReference tripsCollRef;
+
+    private Trip tripSnapshot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,15 +89,21 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        button2 = (Button) findViewById(R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "button2 clicked");
 
-            }
-        });
+        // prepare the Adapter
+        mTripsArrayList = new ArrayList<>();
+        tripsListAdapter = new TripsListAdapter(getApplicationContext(),mTripsArrayList);
 
+        // Initiate the RecyclerView
+        mTripsRecycler = (RecyclerView) findViewById(R.id.trips_list);
+        mTripsRecycler.setHasFixedSize(true);
+        mTripsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mTripsRecycler.setAdapter(tripsListAdapter);
+
+        // Obtain the FirebaseDatabase instance.
+        db =  FirebaseFirestore.getInstance();
+
+        tripsCollRef = db.collection("trips");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -231,6 +266,40 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
         Log.d(TAG, "onStart()");
+
+        // Listen to database changes ////
+        tripsCollRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                    switch (dc.getType()) {
+                        case ADDED:
+                            Log.d(TAG, "snapshots: " + dc.getDocument().getData());
+
+                            tripSnapshot = dc.getDocument().toObject(Trip.class);
+                            Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                            mTripsArrayList.add(tripSnapshot);
+
+                            tripsListAdapter.notifyDataSetChanged();
+                            break;
+                        case MODIFIED:
+                            Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                            break;
+                        case REMOVED:
+                            Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                            break;
+                    }
+                }
+
+            }
+        });
     }
 
     @Override
@@ -351,4 +420,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         }
 
     }
+
+
+
 }

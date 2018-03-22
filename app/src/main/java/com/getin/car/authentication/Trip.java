@@ -25,12 +25,14 @@ public class Trip {
     private String label;
     private String details;
     private int seats;
+    private int freeSeats;
+    private int takenSeats;
+
     private String transportationType;
     private String transportationModel ;
     private int distance;
     private int duration;
     private int cost;
-
 
 
     private String gender ;
@@ -246,6 +248,22 @@ public class Trip {
 
     public void setCost(int cost) {
         this.cost = cost;
+    }
+
+    public int getFreeSeats() {
+        return freeSeats;
+    }
+
+    public void setFreeSeats(int freeSeats) {
+        this.freeSeats = freeSeats;
+    }
+
+    public int getTakenSeats() {
+        return takenSeats;
+    }
+
+    public void setTakenSeats(int takenSeats) {
+        this.takenSeats = takenSeats;
     }
 
     public static int TimeToInteger(AlarmTime time) {

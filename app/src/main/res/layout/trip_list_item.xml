@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/owner_pic"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/com_facebook_profile_picture_blank_portrait"
+            tools:layout_constraintTop_creator="1"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/label"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/owner_name"
+            app:layout_constraintVertical_bias="0.0"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/guideline"
+            android:layout_marginRight="0dp" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.4" />
+
+        <TextView
+            android:id="@+id/owner_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center_horizontal"
+            android:text="TextView"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/guideline"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/total_seat_txt" />
+
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:text="TextView"
+            android:maxLines="2"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            android:layout_marginTop="8dp"
+            app:layout_constraintHorizontal_bias="0.0" />
+
+        <TextView
+            android:id="@+id/starting_time"
+            android:layout_width="0dp"
+            android:layout_height="19dp"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            app:layout_constraintTop_toBottomOf="@+id/label"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:layout_constraintRight_creator="1"
+            android:layout_marginEnd="3dp"
+            tools:layout_constraintLeft_creator="1"
+            app:layout_constraintLeft_toRightOf="@+id/time_image"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintHorizontal_bias="0.0" />
+
+        <TextView
+            android:id="@+id/cost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:text="240"
+            app:layout_constraintLeft_toRightOf="@+id/money_icon"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/transportation_type" />
+
+        <TextView
+            android:id="@+id/transportation_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/starting_time"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            app:layout_constraintLeft_toRightOf="@+id/car_icon"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginLeft="8dp" />
+
+        <ImageView
+            android:id="@+id/time_image"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="20dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            app:srcCompat="@mipmap/ic_access_time_black_48dp"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintTop_toTopOf="@+id/starting_time"
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/starting_time"
+            android:layout_marginBottom="0dp" />
+
+        <ImageView
+            android:id="@+id/money_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@mipmap/coins_black"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintTop_toTopOf="@+id/cost"
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/cost"
+            android:layout_marginBottom="0dp" />
+
+        <ImageView
+            android:id="@+id/car_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@mipmap/ic_front_car_black"
+            tools:layout_constraintRight_creator="1"
+            android:layout_marginEnd="8dp"
+            tools:layout_constraintLeft_creator="1"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            app:layout_constraintBottom_toBottomOf="@+id/transportation_type"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintTop_toTopOf="@+id/transportation_type"
+            android:layout_marginTop="0dp" />
+
+        <ImageView
+            android:id="@+id/total_seat_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginLeft="8dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            app:srcCompat="@mipmap/car_seat_black"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1"
+            app:layout_constraintTop_toTopOf="@+id/total_seat_txt"
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/total_seat_txt"
+            android:layout_marginBottom="0dp" />
+
+        <TextView
+            android:id="@+id/total_seat_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="150"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/cost"
+            app:layout_constraintLeft_toRightOf="@+id/total_seat_icon"
+            android:layout_marginLeft="0dp" />
+
+        <ImageView
+            android:id="@+id/taken_seat_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginLeft="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="@+id/taken_seat_txt"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline3"
+            app:srcCompat="@mipmap/car_seat_red"
+            app:layout_constraintTop_toTopOf="@+id/taken_seat_txt"
+            android:layout_marginTop="0dp" />
+
+        <TextView
+            android:id="@+id/taken_seat_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="150"
+            app:layout_constraintLeft_toRightOf="@+id/taken_seat_icon"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/total_seat_txt" />
+
+        <ImageView
+            android:id="@+id/free_seat_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginLeft="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline4"
+            app:srcCompat="@mipmap/car_seat_green"
+            app:layout_constraintTop_toTopOf="@+id/free_seat_txt"
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/free_seat_txt"
+            android:layout_marginBottom="0dp" />
+
+        <TextView
+            android:id="@+id/free_seat_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="150"
+            app:layout_constraintLeft_toRightOf="@+id/free_seat_icon"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1"
+            android:layout_marginLeft="0dp"
+            app:layout_constraintBaseline_toBaselineOf="@+id/taken_seat_txt"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintHorizontal_bias="0.0" />
+
+        <TextView
+            android:id="@+id/published_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:text="TextView"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:layout_constraintRight_creator="1"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            tools:layout_constraintLeft_creator="1"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/total_seat_txt"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideline3"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.6" />
+
+        <android.support.constraint.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/guideline4"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.81" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v7.widget.CardView>

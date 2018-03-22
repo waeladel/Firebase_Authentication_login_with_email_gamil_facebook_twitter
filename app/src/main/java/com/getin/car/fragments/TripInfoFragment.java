@@ -457,6 +457,8 @@ public class TripInfoFragment extends Fragment implements
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             trip.setSeats(Integer.parseInt(label.getEditableText().toString()));
+                            trip.setFreeSeats(Integer.parseInt(label.getEditableText().toString()));
+                            trip.setTakenSeats(0);
                             settingsAdapter.notifyDataSetChanged();
                             dismiss();
                         }

@@ -164,6 +164,15 @@
     <string name="motorcycle">Motorcycle</string>
     <string name="bus">Bus</string>
     <string name="boat">Boat</string>
+
+
+    <string name="private_car_and_model">Private car: %1$s</string>
+    <string name="ride_sharing_and_model">Ride sharing service: %1$s</string>
+    <string name="taxi_and_model">Taxi: %1$s</string>
+    <string name="motorcycle_and_model">Motorcycle: %1$s</string>
+    <string name="bus_and_model">Bus: %1$s</string>
+    <string name="boat_and_model">Boat: %1$s</string>
+
     <!-- Transportation type array -->
 
     <!-- gender array -->
