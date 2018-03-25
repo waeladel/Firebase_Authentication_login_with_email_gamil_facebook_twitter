@@ -40,6 +40,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 
@@ -80,6 +81,10 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     private Trip tripSnapshot;
 
+    private static final int QUERY_LIMIT = 3;
+    private DocumentSnapshot lastVisible;
+    private Boolean isFirstPageFirstLoad = true; // to display other users's posts on top because it's recent
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +104,22 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         mTripsRecycler.setHasFixedSize(true);
         mTripsRecycler.setLayoutManager(new LinearLayoutManager(this));
         mTripsRecycler.setAdapter(tripsListAdapter);
+
+        // check if recycler view reached it's bottom to load more posts ////
+        mTripsRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                Boolean reachedBottom = !recyclerView.canScrollVertically(1);
+
+                if(reachedBottom){
+                    Log.d(TAG, "reached Bottom" );
+                    loadMorePost();
+                }
+
+            }
+        });
 
         // Obtain the FirebaseDatabase instance.
         db =  FirebaseFirestore.getInstance();
@@ -268,34 +289,54 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         Log.d(TAG, "onStart()");
 
         // Listen to database changes ////
-        tripsCollRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+        Query firstQuery = tripsCollRef.orderBy("created", Query.Direction.DESCENDING).limit(QUERY_LIMIT);
+        firstQuery.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
-            public void onEvent(@Nullable QuerySnapshot snapshots,
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
                                 @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
                     Log.w(TAG, "listen:error", e);
                     return;
                 }
 
-                for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                    switch (dc.getType()) {
-                        case ADDED:
-                            Log.d(TAG, "snapshots: " + dc.getDocument().getData());
+                try {
+                    if (!documentSnapshots.isEmpty()) {
 
-                            tripSnapshot = dc.getDocument().toObject(Trip.class);
-                            Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                        if (isFirstPageFirstLoad) {
 
-                            mTripsArrayList.add(tripSnapshot);
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+                            mTripsArrayList.clear();
+                        }
 
-                            tripsListAdapter.notifyDataSetChanged();
-                            break;
-                        case MODIFIED:
-                            Log.d(TAG, "Modified city: " + dc.getDocument().getData());
-                            break;
-                        case REMOVED:
-                            Log.d(TAG, "Removed city: " + dc.getDocument().getData());
-                            break;
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "snapshots: " + dc.getDocument().getData());
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    if (isFirstPageFirstLoad) {
+                                        mTripsArrayList.add(tripSnapshot);
+                                    } else {
+                                        mTripsArrayList.add(0, tripSnapshot);
+                                    }
+
+                                    tripsListAdapter.notifyDataSetChanged();
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                        isFirstPageFirstLoad = false;
                     }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
                 }
 
             }
@@ -421,6 +462,59 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     }
 
+    public void loadMorePost() {
 
+        // Listen to database changes ////
+        Query nextQuery = tripsCollRef
+                .orderBy("created", Query.Direction.DESCENDING)
+                .startAfter(lastVisible)
+                .limit(QUERY_LIMIT);
+
+        nextQuery.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                try {
+                    if (!documentSnapshots.isEmpty()) {
+
+                        lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "snapshots: " + dc.getDocument().getData());
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    mTripsArrayList.add(tripSnapshot);
+
+                                    tripsListAdapter.notifyDataSetChanged();
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                    }else{
+                        Toast.makeText(TripsActivity.this, getString(R.string.no_more_trips),
+                                Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+    }
 
 }
