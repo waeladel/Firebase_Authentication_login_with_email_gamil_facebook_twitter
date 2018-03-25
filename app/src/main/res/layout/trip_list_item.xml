@@ -9,29 +9,27 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/owner_pic"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
+            app:layout_constraintBottom_toTopOf="@+id/owner_name"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/published_txt"
             app:srcCompat="@drawable/com_facebook_profile_picture_blank_portrait"
-            tools:layout_constraintTop_creator="1"
-            tools:layout_constraintRight_creator="1"
             tools:layout_constraintBottom_creator="1"
             tools:layout_constraintLeft_creator="1"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/label"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/owner_name"
-            app:layout_constraintVertical_bias="0.0"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/guideline"
-            android:layout_marginRight="0dp" />
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintTop_creator="1" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline"
@@ -48,223 +46,276 @@
             android:layout_marginRight="8dp"
             android:gravity="center_horizontal"
             android:text="TextView"
+            app:layout_constraintBottom_toTopOf="@+id/barrier2"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/guideline"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/total_seat_txt" />
+            app:layout_constraintRight_toLeftOf="@+id/guideline" />
 
         <TextView
             android:id="@+id/label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:text="TextView"
+            android:layout_marginTop="8dp"
             android:maxLines="2"
+            android:text="TextView"
+            android:textStyle="bold"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            tools:layout_constraintRight_creator="1"
             tools:layout_constraintLeft_creator="1"
-            android:layout_marginTop="8dp"
-            app:layout_constraintHorizontal_bias="0.0" />
+            tools:layout_constraintRight_creator="1" />
 
         <TextView
             android:id="@+id/starting_time"
             android:layout_width="0dp"
-            android:layout_height="19dp"
-            android:layout_marginTop="8dp"
-            android:text="TextView"
-            app:layout_constraintTop_toBottomOf="@+id/label"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            tools:layout_constraintRight_creator="1"
-            android:layout_marginEnd="3dp"
-            tools:layout_constraintLeft_creator="1"
-            app:layout_constraintLeft_toRightOf="@+id/time_image"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            app:layout_constraintHorizontal_bias="0.0" />
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/none"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toRightOf="@+id/time_image"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/published_txt"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
         <TextView
             android:id="@+id/cost"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:text="240"
-            app:layout_constraintLeft_toRightOf="@+id/money_icon"
             android:layout_marginTop="8dp"
+            android:text="@string/zero"
+            app:layout_constraintLeft_toRightOf="@+id/money_icon"
             app:layout_constraintTop_toBottomOf="@+id/transportation_type" />
 
         <TextView
             android:id="@+id/transportation_type"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="3dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
-            android:text="TextView"
+            android:text="@string/none"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toRightOf="@+id/car_icon"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/starting_time"
-            tools:layout_constraintRight_creator="1"
             tools:layout_constraintLeft_creator="1"
-            app:layout_constraintLeft_toRightOf="@+id/car_icon"
-            app:layout_constraintHorizontal_bias="0.0"
-            android:layout_marginLeft="8dp" />
+            tools:layout_constraintRight_creator="1" />
 
         <ImageView
             android:id="@+id/time_image"
             android:layout_width="@dimen/trip_ico_dp_20"
             android:layout_height="20dp"
             android:scaleType="centerCrop"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline"
-            app:srcCompat="@mipmap/ic_access_time_black_48dp"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintTop_toTopOf="@+id/starting_time"
-            android:layout_marginTop="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/starting_time"
-            android:layout_marginBottom="0dp" />
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/starting_time"
+            app:srcCompat="@drawable/ic_checkered_flag_grey"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
         <ImageView
             android:id="@+id/money_icon"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@mipmap/coins_black"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintTop_toTopOf="@+id/cost"
+            android:layout_marginBottom="0dp"
             android:layout_marginTop="0dp"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="@+id/cost"
-            android:layout_marginBottom="0dp" />
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/cost"
+            app:srcCompat="@mipmap/coins_black" />
 
         <ImageView
             android:id="@+id/car_icon"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:scaleType="centerCrop"
-            app:srcCompat="@mipmap/ic_front_car_black"
-            tools:layout_constraintRight_creator="1"
-            android:layout_marginEnd="8dp"
-            tools:layout_constraintLeft_creator="1"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline"
             app:layout_constraintBottom_toBottomOf="@+id/transportation_type"
-            android:layout_marginBottom="0dp"
+            app:layout_constraintLeft_toLeftOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="@+id/transportation_type"
-            android:layout_marginTop="0dp" />
+            app:srcCompat="@drawable/ic_car_grey_rounded"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
         <ImageView
             android:id="@+id/total_seat_icon"
             android:layout_width="@dimen/trip_ico_dp_20"
             android:layout_height="@dimen/trip_ico_dp_20"
-            android:layout_marginLeft="8dp"
             android:scaleType="centerCrop"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline"
-            app:srcCompat="@mipmap/car_seat_black"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1"
-            app:layout_constraintTop_toTopOf="@+id/total_seat_txt"
-            android:layout_marginTop="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/total_seat_txt"
-            android:layout_marginBottom="0dp" />
+            app:layout_constraintEnd_toStartOf="@+id/total_seat_txt"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/total_seat_txt"
+            app:srcCompat="@drawable/ic_car_seat_black"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
         <TextView
             android:id="@+id/total_seat_txt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="150"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/cost"
-            app:layout_constraintLeft_toRightOf="@+id/total_seat_icon"
-            android:layout_marginLeft="0dp" />
+            android:text="@string/zero"
+            app:layout_constraintEnd_toStartOf="@+id/taken_seat_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/total_seat_icon"
+            app:layout_constraintTop_toBottomOf="@+id/cost" />
 
         <ImageView
             android:id="@+id/taken_seat_icon"
             android:layout_width="@dimen/trip_ico_dp_20"
             android:layout_height="@dimen/trip_ico_dp_20"
-            android:layout_marginLeft="0dp"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="@+id/taken_seat_txt"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline3"
-            app:srcCompat="@mipmap/car_seat_red"
+            app:layout_constraintEnd_toStartOf="@+id/taken_seat_txt"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/total_seat_txt"
             app:layout_constraintTop_toTopOf="@+id/taken_seat_txt"
-            android:layout_marginTop="0dp" />
+            app:srcCompat="@drawable/ic_car_seat_red" />
 
         <TextView
             android:id="@+id/taken_seat_txt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="150"
-            app:layout_constraintLeft_toRightOf="@+id/taken_seat_icon"
-            android:layout_marginLeft="0dp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/total_seat_txt" />
+            android:text="@string/zero"
+            app:layout_constraintBaseline_toBaselineOf="@+id/total_seat_txt"
+            app:layout_constraintEnd_toStartOf="@+id/free_seat_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/taken_seat_icon" />
 
         <ImageView
             android:id="@+id/free_seat_icon"
             android:layout_width="@dimen/trip_ico_dp_20"
             android:layout_height="@dimen/trip_ico_dp_20"
-            android:layout_marginLeft="0dp"
             android:scaleType="centerCrop"
-            app:layout_constraintLeft_toLeftOf="@+id/guideline4"
-            app:srcCompat="@mipmap/car_seat_green"
-            app:layout_constraintTop_toTopOf="@+id/free_seat_txt"
-            android:layout_marginTop="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/free_seat_txt"
-            android:layout_marginBottom="0dp" />
+            app:layout_constraintEnd_toStartOf="@+id/free_seat_txt"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/taken_seat_txt"
+            app:layout_constraintTop_toTopOf="@+id/free_seat_txt"
+            app:srcCompat="@drawable/ic_car_seat_green" />
 
         <TextView
             android:id="@+id/free_seat_txt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="150"
-            app:layout_constraintLeft_toRightOf="@+id/free_seat_icon"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1"
-            android:layout_marginLeft="0dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/zero"
             app:layout_constraintBaseline_toBaselineOf="@+id/taken_seat_txt"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintHorizontal_bias="0.0" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/free_seat_icon"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
 
         <TextView
             android:id="@+id/published_txt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:text="TextView"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            tools:layout_constraintRight_creator="1"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
-            tools:layout_constraintLeft_creator="1"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/total_seat_txt"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="TextView"
+            android:textSize="@dimen/small_text_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/label"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1" />
+
+        <android.support.constraint.Barrier
+            android:id="@+id/barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="total_seat_txt,total_seat_icon,free_seat_icon,taken_seat_icon,free_seat_txt,taken_seat_txt"
+            tools:layout_editor_absoluteY="168dp" />
+
+        <ImageView
+            android:id="@+id/gender_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
             android:layout_marginBottom="8dp"
-            app:layout_constraintVertical_bias="0.0" />
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/chat_icon"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/barrier"
+            app:srcCompat="@drawable/ic_men_and_women_toilet" />
 
-        <android.support.constraint.Guideline
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/guideline3"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.6" />
+        <ImageView
+            android:id="@+id/chat_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/music_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gender_icon"
+            app:layout_constraintTop_toTopOf="@+id/barrier"
+            app:srcCompat="@drawable/ic_chat_grey" />
 
-        <android.support.constraint.Guideline
+        <ImageView
+            android:id="@+id/music_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cursing_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/chat_icon"
+            app:layout_constraintTop_toTopOf="@+id/barrier"
+            app:srcCompat="@drawable/ic_music_note_grey_48px" />
+
+        <ImageView
+            android:id="@+id/cursing_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/smoking_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/music_icon"
+            app:layout_constraintTop_toTopOf="@+id/barrier"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_swearing_grey" />
+
+        <ImageView
+            android:id="@+id/smoking_icon"
+            android:layout_width="@dimen/trip_ico_dp_20"
+            android:layout_height="@dimen/trip_ico_dp_20"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/cursing_icon"
+            app:layout_constraintTop_toTopOf="@+id/barrier"
+            app:srcCompat="@drawable/ic_smoke_free_grey" />
+
+        <android.support.constraint.Barrier
+            android:id="@+id/barrier2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/guideline4"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.81" />
+            android:layout_height="0dp"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="caht_icon,gender_icon,smoking_icon,music_icon,cursing_icon"
+            tools:layout_editor_absoluteY="183dp" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -5,10 +5,10 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorSecondaryText">#757575</color>
     <color name="colorWhite">#ffffff</color>
-    <color name="colorGrey">#BFBFBF</color>
-    <color name="colorRed">#ff0000</color>
+    <color name="colorGrey">#bfbfbf</color>
+    <color name="colorRed">#e70000</color>
     <color name="colorBlue">#0000FF</color>
-    <color name="colorGreen">#00ff00</color>
+    <color name="colorGreen">#03d803</color>
 
 
 </resources>

@@ -40,7 +40,8 @@
     <string name="set_trip_info">Set Trip Info</string>
     <string name="time">Starting Time</string>
     <string name="date">Date</string>
-    <string name="none">None</string>
+    <string name="none">Not Specified</string>
+    <string name="zero">0</string>
     <string name="label">Label</string>
     <string name="label_text">From %1$s to %2$s</string>
     <string name="post_label">Post label</string>

@@ -52,6 +52,7 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     }else{
                         holder.transportationType.setText(R.string.private_car);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_car_black_rounded);
                     break;
                 case "Ride sharing service":
                     if(TripsArrayList.get(position).getTransportationModel()!= null){
@@ -59,6 +60,7 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     }else{
                         holder.transportationType.setText(R.string.ride_sharing);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_sedan_car_front);
                     break;
                 case "Taxi":
                     if(TripsArrayList.get(position).getTransportationModel()!= null){
@@ -66,6 +68,7 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     }else{
                         holder.transportationType.setText(R.string.taxi);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_cab_taxi_old);
                     break;
                 case "Motorcycle":
                     if(TripsArrayList.get(position).getTransportationModel()!= null){
@@ -73,6 +76,7 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     }else{
                         holder.transportationType.setText(R.string.motorcycle);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_motorcycle_black_48px);
                     break;
                 case "Bus":
                     if(TripsArrayList.get(position).getTransportationModel()!= null){
@@ -80,14 +84,19 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     }else{
                         holder.transportationType.setText(R.string.bus);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_directions_bus_black_48px);
                     break;
                 case "Boat":
                     if(TripsArrayList.get(position).getTransportationModel()!= null){
                         holder.transportationType.setText(context.getString(R.string.boat_and_model, TripsArrayList.get(position).getTransportationModel()));
-                        holder.transportationType.setText(context.getString(R.string.boat_and_model, TripsArrayList.get(position).getTransportationModel()));
                     }else{
                         holder.transportationType.setText(R.string.boat);
                     }
+                    holder.carIcon.setImageResource(R.drawable.ic_directions_boat_black_48px);
+                    break;
+                default:
+                    holder.transportationType.setText(R.string.none);
+                    holder.carIcon.setImageResource(R.drawable.ic_car_grey_rounded);
                     break;
             }
         }
@@ -98,8 +107,86 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
         holder.freeSeat.setText(String.format(Locale.getDefault(),"%d", TripsArrayList.get(position).getFreeSeats()));
         holder.ownerName.setText(TripsArrayList.get(position).getOwnerName());
 
+
+        if(TripsArrayList.get(position).getChat() != null){
+            if(TripsArrayList.get(position).getChat()){
+                holder.chatIcon.setImageResource(R.drawable.ic_chat_green);
+            }else{
+                holder.chatIcon.setImageResource(R.drawable.ic_chat_red);
+            }
+        }else{
+            holder.chatIcon.setImageResource(R.drawable.ic_chat_grey);
+        }
+
+        if(TripsArrayList.get(position).getCursing() != null){
+            if(TripsArrayList.get(position).getCursing()){
+                holder.cursingIcon.setImageResource(R.drawable.ic_swearing_green);
+            }else{
+                holder.cursingIcon.setImageResource(R.drawable.ic_swearing_red);
+            }
+        }else{
+            holder.cursingIcon.setImageResource(R.drawable.ic_swearing_grey);
+
+        }
+
+        if(TripsArrayList.get(position).getSmoking() != null){
+            if(TripsArrayList.get(position).getSmoking()){
+                holder.smokingIcon.setImageResource(R.drawable.ic_smoking_rooms_green);
+            }else{
+                holder.smokingIcon.setImageResource(R.drawable.ic_smoke_red);
+            }
+        }else{
+            holder.smokingIcon.setImageResource(R.drawable.ic_smoke_free_grey);
+
+        }
+
+
+        if(TripsArrayList.get(position).getMusic()!= null){
+            switch (TripsArrayList.get(position).getMusic()) {
+                case "none":
+                    holder.musicIcon.setImageResource(R.drawable.ic_music_note_red_48px);
+                    break;
+                case "driver":
+                    holder.musicIcon.setImageResource(R.drawable.ic_music_note_green_48px);
+                    break;
+                case "passenger":
+                    holder.musicIcon.setImageResource(R.drawable.ic_music_note_green_48px);
+                    break;
+                default:
+                    holder.musicIcon.setImageResource(R.drawable.ic_music_note_grey_48px);
+                    break;
+
+            }
+        }
+
+        if(TripsArrayList.get(position).getGender()!= null){
+            switch (TripsArrayList.get(position).getGender()) {
+                case "Any":
+                    holder.genderIcon.setImageResource(R.drawable.ic_men_and_women_toilet);
+                    break;
+                case "Females only":
+                    holder.genderIcon.setImageResource(R.drawable.ic_business_woman);
+                    break;
+                case "Males only":
+                    holder.genderIcon.setImageResource(R.drawable.ic_business_man);
+                    break;
+                default:
+                    holder.genderIcon.setImageResource(R.drawable.ic_men_and_women_toilet);
+                    break;
+
+            }
+        }
+
+
+
+
         if(TripsArrayList.get(position).getDate() != null){
             holder.startTime.setText(DateFormat.getDateTimeInstance(DateFormat.MEDIUM , DateFormat.SHORT).format(TripsArrayList.get(position).getDate()));
+            holder.startTimeIcon.setImageResource(R.drawable.ic_checkered_flag);
+        }else{
+            holder.startTime.setText(R.string.none);
+            holder.startTimeIcon.setImageResource(R.drawable.ic_checkered_flag_grey);
+
         }
 
         if (TripsArrayList.get(position).getCreated() != null) {
@@ -128,11 +215,14 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                 totalSeat, takenSeat, freeSeat,
                 ownerName,publishedOn;
 
-        public ImageView ownerPic;
+        public ImageView ownerPic, startTimeIcon, carIcon,
+                genderIcon, chatIcon, musicIcon,
+                cursingIcon, smokingIcon ;
 
         public ViewHolder(View itemView) {
             super(itemView);
             //itemView = row;
+
             row = itemView;
             labelText = row.findViewById(R.id.label);
             startTime = row.findViewById(R.id.starting_time);
@@ -144,6 +234,13 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
             ownerName = row.findViewById(R.id.owner_name);
             publishedOn = row.findViewById(R.id.published_txt);
             ownerPic = row.findViewById(R.id.owner_pic);
+            startTimeIcon = row.findViewById(R.id.time_image);
+            carIcon = row.findViewById(R.id.car_icon);
+            genderIcon =row.findViewById(R.id.gender_icon);
+            chatIcon =row.findViewById(R.id.chat_icon);
+            musicIcon = row.findViewById(R.id.music_icon);
+            cursingIcon = row.findViewById(R.id.cursing_icon);
+            smokingIcon = row.findViewById(R.id.smoking_icon );
 
         }
 
