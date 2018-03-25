@@ -378,27 +378,27 @@ public class TripRulesFragment extends Fragment {
 
                             switch (position){ //switch quality spinner position
                                 case 0:
-                                    trip.setMusic("none");
+                                    //trip.setMusic("none");
                                     genre.setEnabled(false);
                                     genre.setHint(R.string.disabled);
                                     genre.setText(null);
                                     Log.d(TAG, "none spinner selected");
                                     break;
                                 case 1:
-                                    trip.setMusic("driver");
+                                    //trip.setMusic("driver");
                                     genre.setEnabled(true);
                                     genre.setHint(R.string.music_genre_hint);
                                     Log.d(TAG, "driver spinner selected");
                                     break;
                                 case 2:
-                                    trip.setMusic("passenger");
+                                    //trip.setMusic("passenger");
                                     genre.setEnabled(true);
                                     genre.setHint(R.string.music_genre_hint);
                                     Log.d(TAG, "passenger spinner selected");
                                     break;
                                 default:
                                     //label.setVisibility(View.GONE);
-                                    trip.setMusic("none");
+                                    //trip.setMusic("none");
                                     genre.setEnabled(false);
                                     genre.setText(null);
                                     Log.d(TAG, "none spinner selected");
@@ -423,6 +423,23 @@ public class TripRulesFragment extends Fragment {
                             if(genre.getText() != null){
                                 trip.setGenre(genre.getText().toString());
                             }
+
+                            switch (musicSpinner.getSelectedItemPosition()){ //switch quality spinner position
+                                case 0:
+                                    trip.setMusic("none");
+                                    break;
+                                case 1:
+                                    trip.setMusic("driver");
+                                    break;
+                                case 2:
+                                    trip.setMusic("passenger");
+                                    break;
+                                default:
+                                    trip.setMusic("none");
+                                    break;
+
+                            }
+
                             settingsAdapter.notifyDataSetChanged();
                             dismiss();
                         }

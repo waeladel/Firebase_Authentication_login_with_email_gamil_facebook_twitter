@@ -99,6 +99,9 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     holder.carIcon.setImageResource(R.drawable.ic_car_grey_rounded);
                     break;
             }
+        }else{
+            holder.transportationType.setText(R.string.none);
+            holder.carIcon.setImageResource(R.drawable.ic_car_grey_rounded);
         }
 
 
@@ -157,6 +160,8 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     break;
 
             }
+        }else{
+            holder.musicIcon.setImageResource(R.drawable.ic_music_note_grey_48px);
         }
 
         if(TripsArrayList.get(position).getGender()!= null){
@@ -175,6 +180,8 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
                     break;
 
             }
+        }else {
+            holder.genderIcon.setImageResource(R.drawable.ic_men_and_women_toilet);
         }
 
 
