@@ -148,58 +148,115 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
             }
         });
 
+        // listner for sorting spinner ///
+        switch (mTripsPreference.getInt("sortingID", 0)){ // display sorting option selected from shared preference
+            case 0:
+                mSortSpinner.setSelection(0);
+                Log.d(TAG, "display 0 option on sorting spinner");
+                break;
+            case 1:
+                mSortSpinner.setSelection(1);
+                Log.d(TAG, "display 1 option on sorting spinner");
+                break;
+            case 2:
+                mSortSpinner.setSelection(2);
+                Log.d(TAG, "display 2 option on sorting spinner");
+                break;
+            case 3:
+                mSortSpinner.setSelection(3);
+                Log.d(TAG, "display 3 option on sorting spinner");
+                break;
+            case 4:
+                mSortSpinner.setSelection(4);
+                Log.d(TAG, "display 4 option on sorting spinner");
+                break;
+            case 5:
+                mSortSpinner.setSelection(5);
+                Log.d(TAG, "display 5 option on sorting spinner");
+                break;
+        }
+
         // Listener for item selected on the spinner ////
         mSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 switch (position){ //switch quality spinner position
                     case 0:
-                        editor.putInt("sorting", 0);
+                        editor.putInt("sortingID", 0);
+                        editor.putString("orderBy", "date");
+                        editor.putString("direction", "ascending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 0 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("date" , Query.Direction.ASCENDING);
                         break;
                     case 1:
-                        editor.putInt("sorting", 1);
+                        editor.putInt("sortingID", 1);
+                        editor.putString("orderBy", "date");
+                        editor.putString("direction", "descending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 1 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("date" , Query.Direction.DESCENDING);
                         break;
                     case 2:
-                        editor.putInt("sorting", 2);
+                        editor.putInt("sortingID", 2);
+                        editor.putString("orderBy", "created");
+                        editor.putString("direction", "descending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 2 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("created" , Query.Direction.DESCENDING);
                         break;
                     case 3:
-                        editor.putInt("sorting", 3);
+                        editor.putInt("sortingID", 3);
+                        editor.putString("orderBy", "created");
+                        editor.putString("direction", "ascending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 3 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("created" , Query.Direction.ASCENDING);
                         break;
                     case 4:
-                        editor.putInt("sorting", 4);
+                        editor.putInt("sortingID", 4);
+                        editor.putString("orderBy", "cost");
+                        editor.putString("direction", "ascending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 4 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("cost" , Query.Direction.ASCENDING);
                         break;
                     case 5:
-                        editor.putInt("sorting", 5);
+                        editor.putInt("sortingID", 5);
+                        editor.putString("orderBy", "cost");
+                        editor.putString("direction", "descending");
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 5 selected");
-                        break;
-                    case 6:
-                        editor.putInt("sorting", 6);
-                        editor.apply();
-                        Log.d(TAG, "spinner Listener: 6 selected");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("cost" , Query.Direction.DESCENDING);
                         break;
                     default:
-                        editor.putInt("sorting", 0);
+                        editor.putInt("sortingID", 0);
+                        editor.putString("orderBy", "date");
+                        editor.putString("direction", "descending");
                         editor.apply();
-                        Log.d(TAG, "spinner Listener: 0 selected");
+                        Log.d(TAG, "spinner Listener: 0 default");
+                        isFirstPageFirstLoad = true;
+                        setFirstQuery("date" , Query.Direction.DESCENDING);
                         break;
-
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
                 // your code here
+                Log.d(TAG, "spinner NothingSelected");
+                editor.putInt("sortingID", 0);
+                editor.putString("orderBy", "date");
+                editor.putString("direction", "descending");
+                editor.apply();
+                isFirstPageFirstLoad = true;
+                setFirstQuery("date" , Query.Direction.DESCENDING);
             }
 
         });
@@ -225,7 +282,9 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
                 if(reachedBottom){
                     Log.d(TAG, "reached Bottom" );
-                    loadMorePost();
+                    String direction = mTripsPreference.getString("direction", "descending");
+                    String orderBy = mTripsPreference.getString("orderBy", "date");
+                    loadMorePost(orderBy, getSortDirection(direction));
                 }
 
             }
@@ -293,74 +352,6 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 // ...
             }
         };
-
-        // Listen to database changes ////
-        Query firstQuery = tripsCollRef.orderBy("created", Query.Direction.DESCENDING).limit(QUERY_LIMIT);
-        registration = firstQuery.addSnapshotListener( new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "listen:error", e);
-                    return;
-                }
-
-                try {
-                    if (!documentSnapshots.isEmpty()) {
-                        Log.w(TAG, "documentSnapshots.size="+ documentSnapshots.size());
-
-                        if (isFirstPageFirstLoad) {
-
-                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
-                            mTripsArrayList.clear();
-                        }
-
-                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
-                            switch (dc.getType()) {
-                                case ADDED:
-                                    Log.d(TAG, "firstQuery snapshots added: " + dc.getDocument().getData());
-
-                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
-                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
-
-                                    if (isFirstPageFirstLoad) {
-                                        Log.d(TAG, "loaded for the first time ");
-                                        mTripsArrayList.add(tripSnapshot);
-                                        tripsListAdapter.notifyDataSetChanged();
-                                    } else {
-                                        Log.d(TAG, "loaded for the second time ");
-                                        mNewPostsCounts.add(1); // add new post to the counter
-
-                                        if (mNewPostsCounts.size() <= 1) {// for singular
-                                            mSeeNewText.setText(getString(R.string.see_new_post, mNewPostsCounts.size()));
-                                        }else{  // for plural
-                                            mSeeNewText.setText(getString(R.string.see_new_posts, mNewPostsCounts.size()));
-                                        }
-                                        mSeeNewCardView.setVisibility(View.VISIBLE);
-                                        mTripsArrayList.add(0, tripSnapshot);
-                                        //tripsListAdapter.notifyDataSetChanged();
-                                        Log.d(TAG, "mNewPostsCounts.size= " +mNewPostsCounts.size());
-                                    }
-
-                                    break;
-                                case MODIFIED:
-                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
-                                    break;
-                                case REMOVED:
-                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
-                                    break;
-                            }
-                        }
-
-                        isFirstPageFirstLoad = false;
-                    }
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-
-            }
-        });
-
     }// end of on create
 
     @Override
@@ -465,40 +456,6 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
         Log.d(TAG, "onStart()");
-
-        // listner for sorting spinner ///
-        switch (mTripsPreference.getInt("sorting", 0)){ // display sorting option selected from shared preference
-            case 0:
-                mSortSpinner.setSelection(0);
-                Log.d(TAG, "display 0 option on sorting spinner");
-                break;
-            case 1:
-                mSortSpinner.setSelection(1);
-                Log.d(TAG, "display 1 option on sorting spinner");
-                break;
-            case 2:
-                mSortSpinner.setSelection(2);
-                Log.d(TAG, "display 2 option on sorting spinner");
-                break;
-            case 3:
-                mSortSpinner.setSelection(3);
-                Log.d(TAG, "display 3 option on sorting spinner");
-                break;
-            case 4:
-                mSortSpinner.setSelection(4);
-                Log.d(TAG, "display 4 option on sorting spinner");
-                break;
-            case 5:
-                mSortSpinner.setSelection(5);
-                Log.d(TAG, "display 5 option on sorting spinner");
-                break;
-            case 6:
-                mSortSpinner.setSelection(6);
-                Log.d(TAG, "display 6 option on sorting spinner");
-                break;
-        }
-
-
     }
 
     @Override
@@ -569,6 +526,79 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         }
     }
 
+    private void  setFirstQuery(String orderBy , Query.Direction direction){
+        // Listen to database changes ////
+        Log.d(TAG, "FirstQuery orderBy="+ orderBy+ "direction"+direction);
+
+        Query firstQuery = tripsCollRef.orderBy( orderBy, direction).limit(QUERY_LIMIT);
+        registration = firstQuery.addSnapshotListener( new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                try {
+                    if (!documentSnapshots.isEmpty()) {
+                        Log.d(TAG, "documentSnapshots.size="+ documentSnapshots.size());
+
+                        if (isFirstPageFirstLoad) {
+
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+                            mTripsArrayList.clear();
+                        }
+
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "firstQuery snapshots added: " + dc.getDocument().getData());
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    if (isFirstPageFirstLoad) {
+                                        Log.d(TAG, "loaded for the first time ");
+                                        mTripsArrayList.add(tripSnapshot);
+                                        tripsListAdapter.notifyDataSetChanged();
+                                    } else {
+                                        Log.d(TAG, "loaded for the second time ");
+                                        mNewPostsCounts.add(1); // add new post to the counter
+
+                                        if (mNewPostsCounts.size() <= 1) {// for singular
+                                            mSeeNewText.setText(getString(R.string.see_new_post, mNewPostsCounts.size()));
+                                        }else{  // for plural
+                                            mSeeNewText.setText(getString(R.string.see_new_posts, mNewPostsCounts.size()));
+                                        }
+                                        mSeeNewCardView.setVisibility(View.VISIBLE);
+                                        mTripsArrayList.add(0, tripSnapshot);
+                                        //tripsListAdapter.notifyDataSetChanged();
+                                        Log.d(TAG, "mNewPostsCounts.size= " +mNewPostsCounts.size());
+                                    }
+
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                        isFirstPageFirstLoad = false;
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        });
+
+    }
+
+
     private void isUserExist(final String userId){
         // Read from the database just once
         Log.d(TAG, "userId Value is: " + userId);
@@ -628,11 +658,22 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     }
 
-    public void loadMorePost() {
+    public Query.Direction getSortDirection(String direction) {
+        if(direction.equalsIgnoreCase("ascending")){
+            return Query.Direction.ASCENDING;
+        }else if(direction.equalsIgnoreCase("descending ")){
+            return Query.Direction.DESCENDING;
+        }
 
+        return Query.Direction.DESCENDING;
+    }
+
+    public void loadMorePost(String orderBy, Query.Direction direction) {
+
+        Log.d(TAG, "FirstQuery orderBy="+ orderBy+ "direction"+direction);
         // Listen to database changes ////
         Query nextQuery = tripsCollRef
-                .orderBy("created", Query.Direction.DESCENDING)
+                .orderBy(orderBy, direction)
                 .startAfter(lastVisible)
                 .limit(QUERY_LIMIT);
 
