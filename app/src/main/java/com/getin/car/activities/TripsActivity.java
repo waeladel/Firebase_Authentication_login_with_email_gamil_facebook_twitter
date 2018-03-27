@@ -1,13 +1,16 @@
 package com.getin.car.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,9 +18,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +45,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -85,6 +91,18 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
     private DocumentSnapshot lastVisible;
     private Boolean isFirstPageFirstLoad = true; // to display other users's posts on top because it's recent
 
+    private SharedPreferences mTripsPreference;
+    private SharedPreferences.Editor editor;
+    private Spinner mSortSpinner;
+
+    private CardView mSeeNewCardView;
+    private TextView mSeeNewText;
+    private ListenerRegistration registration;
+    private List<Integer> mNewPostsCounts;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,8 +112,100 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // read and write Shared Preference key values form Preference file
+        mTripsPreference = PreferenceManager.getDefaultSharedPreferences(this);
+        //save Preferences
+        editor = mTripsPreference.edit();
 
-        // prepare the Adapter
+
+        mSortSpinner = findViewById(R.id.sort_spinner);
+        mSeeNewCardView = findViewById(R.id.seeNew_cardView);
+        mSeeNewText = findViewById(R.id.see_more_txt);
+
+        mNewPostsCounts = new ArrayList<Integer>();// to add the new posts count to list
+
+
+        // display new posts when click on see new CardView
+        mSeeNewCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSeeNewCardView.setVisibility(View.GONE);
+                // reset the new posts counter to zero
+                if (mNewPostsCounts.size() > 0) {
+                    /*for (int i = 0; i < mNewPostsCounts.size(); i++) {
+                        mNewPostsCounts.remove(i);
+                    }*/
+                    mNewPostsCounts.clear();
+                }
+                Log.d(TAG, "mSeeNewCardView clicked: mNewPostsCounts.size+ "+mNewPostsCounts.size());
+
+                tripsListAdapter.notifyDataSetChanged();
+
+                // move to the top
+                LinearLayoutManager layoutManager = (LinearLayoutManager) mTripsRecycler
+                        .getLayoutManager();
+                layoutManager.scrollToPositionWithOffset(0, 0);
+            }
+        });
+
+        // Listener for item selected on the spinner ////
+        mSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                switch (position){ //switch quality spinner position
+                    case 0:
+                        editor.putInt("sorting", 0);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 0 selected");
+                        break;
+                    case 1:
+                        editor.putInt("sorting", 1);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 1 selected");
+                        break;
+                    case 2:
+                        editor.putInt("sorting", 2);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 2 selected");
+                        break;
+                    case 3:
+                        editor.putInt("sorting", 3);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 3 selected");
+                        break;
+                    case 4:
+                        editor.putInt("sorting", 4);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 4 selected");
+                        break;
+                    case 5:
+                        editor.putInt("sorting", 5);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 5 selected");
+                        break;
+                    case 6:
+                        editor.putInt("sorting", 6);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 6 selected");
+                        break;
+                    default:
+                        editor.putInt("sorting", 0);
+                        editor.apply();
+                        Log.d(TAG, "spinner Listener: 0 selected");
+                        break;
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+
+            // prepare the Adapter
         mTripsArrayList = new ArrayList<>();
         tripsListAdapter = new TripsListAdapter(getApplicationContext(),mTripsArrayList);
 
@@ -183,7 +293,75 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 // ...
             }
         };
-    }
+
+        // Listen to database changes ////
+        Query firstQuery = tripsCollRef.orderBy("created", Query.Direction.DESCENDING).limit(QUERY_LIMIT);
+        registration = firstQuery.addSnapshotListener( new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                try {
+                    if (!documentSnapshots.isEmpty()) {
+                        Log.w(TAG, "documentSnapshots.size="+ documentSnapshots.size());
+
+                        if (isFirstPageFirstLoad) {
+
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+                            mTripsArrayList.clear();
+                        }
+
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "firstQuery snapshots added: " + dc.getDocument().getData());
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    if (isFirstPageFirstLoad) {
+                                        Log.d(TAG, "loaded for the first time ");
+                                        mTripsArrayList.add(tripSnapshot);
+                                        tripsListAdapter.notifyDataSetChanged();
+                                    } else {
+                                        Log.d(TAG, "loaded for the second time ");
+                                        mNewPostsCounts.add(1); // add new post to the counter
+
+                                        if (mNewPostsCounts.size() <= 1) {// for singular
+                                            mSeeNewText.setText(getString(R.string.see_new_post, mNewPostsCounts.size()));
+                                        }else{  // for plural
+                                            mSeeNewText.setText(getString(R.string.see_new_posts, mNewPostsCounts.size()));
+                                        }
+                                        mSeeNewCardView.setVisibility(View.VISIBLE);
+                                        mTripsArrayList.add(0, tripSnapshot);
+                                        //tripsListAdapter.notifyDataSetChanged();
+                                        Log.d(TAG, "mNewPostsCounts.size= " +mNewPostsCounts.size());
+                                    }
+
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                        isFirstPageFirstLoad = false;
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        });
+
+    }// end of on create
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -288,59 +466,39 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         mAuth.addAuthStateListener(mAuthListener);
         Log.d(TAG, "onStart()");
 
-        // Listen to database changes ////
-        Query firstQuery = tripsCollRef.orderBy("created", Query.Direction.DESCENDING).limit(QUERY_LIMIT);
-        firstQuery.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "listen:error", e);
-                    return;
-                }
+        // listner for sorting spinner ///
+        switch (mTripsPreference.getInt("sorting", 0)){ // display sorting option selected from shared preference
+            case 0:
+                mSortSpinner.setSelection(0);
+                Log.d(TAG, "display 0 option on sorting spinner");
+                break;
+            case 1:
+                mSortSpinner.setSelection(1);
+                Log.d(TAG, "display 1 option on sorting spinner");
+                break;
+            case 2:
+                mSortSpinner.setSelection(2);
+                Log.d(TAG, "display 2 option on sorting spinner");
+                break;
+            case 3:
+                mSortSpinner.setSelection(3);
+                Log.d(TAG, "display 3 option on sorting spinner");
+                break;
+            case 4:
+                mSortSpinner.setSelection(4);
+                Log.d(TAG, "display 4 option on sorting spinner");
+                break;
+            case 5:
+                mSortSpinner.setSelection(5);
+                Log.d(TAG, "display 5 option on sorting spinner");
+                break;
+            case 6:
+                mSortSpinner.setSelection(6);
+                Log.d(TAG, "display 6 option on sorting spinner");
+                break;
+        }
 
-                try {
-                    if (!documentSnapshots.isEmpty()) {
 
-                        if (isFirstPageFirstLoad) {
-
-                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
-                            mTripsArrayList.clear();
-                        }
-
-                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
-                            switch (dc.getType()) {
-                                case ADDED:
-                                    Log.d(TAG, "snapshots: " + dc.getDocument().getData());
-
-                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
-                                    Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
-
-                                    if (isFirstPageFirstLoad) {
-                                        mTripsArrayList.add(tripSnapshot);
-                                    } else {
-                                        mTripsArrayList.add(0, tripSnapshot);
-                                    }
-
-                                    tripsListAdapter.notifyDataSetChanged();
-                                    break;
-                                case MODIFIED:
-                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
-                                    break;
-                                case REMOVED:
-                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
-                                    break;
-                            }
-                        }
-
-                        isFirstPageFirstLoad = false;
-                    }
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-
-            }
-        });
     }
 
     @Override
@@ -356,6 +514,14 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
             mAuth.removeAuthStateListener(mAuthListener);
         }
         Log.d(TAG, "onStop()");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        registration.remove();
+        Log.d(TAG, "onDestroy()");
+
     }
 
     @Override
@@ -470,7 +636,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 .startAfter(lastVisible)
                 .limit(QUERY_LIMIT);
 
-        nextQuery.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+        registration = nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot documentSnapshots,
                                 @Nullable FirebaseFirestoreException e) {
@@ -487,10 +653,10 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
                             switch (dc.getType()) {
                                 case ADDED:
-                                    Log.d(TAG, "snapshots: " + dc.getDocument().getData());
+                                    Log.d(TAG, "nextQuery snapshots added: " + dc.getDocument().getData());
 
                                     tripSnapshot = dc.getDocument().toObject(Trip.class);
-                                    Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
 
                                     mTripsArrayList.add(tripSnapshot);
 

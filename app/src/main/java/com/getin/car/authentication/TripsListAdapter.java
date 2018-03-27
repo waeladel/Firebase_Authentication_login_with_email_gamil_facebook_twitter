@@ -202,6 +202,8 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
 
         if(TripsArrayList.get(position).getOwnerPic()!= null){
             Glide.with(context).load(TripsArrayList.get(position).getOwnerPic()).into(holder.ownerPic);
+        }else{
+            holder.ownerPic.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
         }
 
     }
