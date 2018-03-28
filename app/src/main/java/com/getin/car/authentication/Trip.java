@@ -14,7 +14,7 @@ import java.util.Date;
  * Created by hp on 14/03/2018.
  */
 
-public class Trip {
+public class Trip extends TripPostId{
 
 
     private GeoPoint origin;

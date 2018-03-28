@@ -9,7 +9,8 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground">
 
         <ImageView
             android:id="@+id/owner_pic"
@@ -45,11 +46,11 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:gravity="center_horizontal"
-            android:text="TextView"
             app:layout_constraintBottom_toTopOf="@+id/barrier2"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/guideline" />
+            app:layout_constraintRight_toLeftOf="@+id/guideline"
+            android:background="?attr/selectableItemBackground"/>
 
         <TextView
             android:id="@+id/label"

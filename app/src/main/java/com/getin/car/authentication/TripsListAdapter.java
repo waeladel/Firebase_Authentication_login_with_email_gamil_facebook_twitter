@@ -3,11 +3,13 @@ package com.getin.car.authentication;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.getin.car.R;
@@ -23,8 +25,12 @@ import java.util.Locale;
 
 public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.ViewHolder> {
 
+    private final static String TAG = TripsListAdapter.class.getSimpleName();
+
     public List<Trip> TripsArrayList;
     public Context context;
+    public String tripPostId;
+    public String ownerId;
 
     public TripsListAdapter(Context context, List<Trip> TripsArrayList){
         this.TripsArrayList = TripsArrayList;
@@ -41,6 +47,7 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
         holder.labelText.setText(TripsArrayList.get(position).getLabel());
         holder.cost.setText(String.format(Locale.getDefault(),"%d", TripsArrayList.get(position).getCost()));
 
@@ -206,6 +213,40 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
             holder.ownerPic.setImageResource(R.drawable.com_facebook_profile_picture_blank_portrait);
         }
 
+        // add listner for the entire row
+        tripPostId = TripsArrayList.get(position).TripPostId; // document ID
+
+        holder.row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "document id="+tripPostId,
+                        Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "document id="+tripPostId);
+
+            }
+        });
+
+        ownerId = TripsArrayList.get(position).getOwnerId();
+
+        holder.ownerPic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "user id="+ownerId,
+                        Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "user id="+ownerId);
+
+            }
+        });
+
+        holder.ownerName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "user id="+ownerId,
+                        Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "user id="+ownerId);
+
+            }
+        });
     }
 
     @Override

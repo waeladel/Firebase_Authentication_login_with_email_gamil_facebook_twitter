@@ -555,7 +555,9 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                 case ADDED:
                                     Log.d(TAG, "firstQuery snapshots added: " + dc.getDocument().getData());
 
-                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    String tripDocumentId = dc.getDocument().getId();
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
                                     //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
 
                                     if (isFirstPageFirstLoad) {
@@ -696,7 +698,9 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                 case ADDED:
                                     Log.d(TAG, "nextQuery snapshots added: " + dc.getDocument().getData());
 
-                                    tripSnapshot = dc.getDocument().toObject(Trip.class);
+                                    String tripDocumentId = dc.getDocument().getId(); // to pass the doc id to adapter
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
                                     //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
 
                                     mTripsArrayList.add(tripSnapshot);
