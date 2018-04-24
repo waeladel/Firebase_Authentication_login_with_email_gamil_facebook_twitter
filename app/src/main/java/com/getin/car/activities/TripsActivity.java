@@ -90,7 +90,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     private Trip tripSnapshot;
 
-    private static final int QUERY_LIMIT = 25;
+    private static final int QUERY_LIMIT = 3; //25
     private DocumentSnapshot lastVisible;
     private Boolean isFirstPageFirstLoad = true; // to display other users's posts on top because it's recent
     private Boolean isSearchActive = false; // to stop reach bottom from loading more next query if the search is empty
@@ -307,10 +307,15 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 Boolean reachedBottom = !recyclerView.canScrollVertically(1);
 
                 if(reachedBottom && !isSearchActive){
-                    Log.d(TAG, "reached Bottom" );
+                    Log.d(TAG, "query reached Bottom" );
                     String direction = mTripsPreference.getString("direction", "descending");
                     String orderBy = mTripsPreference.getString("orderBy", "date");
                     loadMorePost(orderBy, getSortDirection(direction));
+                }else if(reachedBottom && isSearchActive){
+                    Log.d(TAG, "search reached Bottom");
+                    String direction = mTripsPreference.getString("direction", "descending");
+                    String orderBy = mTripsPreference.getString("orderBy", "date");
+                    loadMoreResults(orderBy, getSortDirection(direction));
                 }
 
             }
@@ -685,7 +690,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                             .startAt(search.getMinCost());*/
                 }else if (search.getMaxCost() != null) {
                     Log.d(TAG, "is getMaxCost null? "+ search.getMaxCost());
-                    searchQuery = tripsCollRef.whereLessThanOrEqualTo("cost", search.getMaxCost())
+                    searchQuery = searchQuery.whereLessThanOrEqualTo("cost", search.getMaxCost())
                             .orderBy(orderBy, direction);
                     /*searchQuery = searchQuery.orderBy( "cost", direction)
                             .endAt(search.getMaxCost());*/
@@ -696,6 +701,8 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 searchQuery = searchQuery.orderBy( orderBy, direction);
                 break;
         }
+
+        searchQuery = searchQuery.limit(QUERY_LIMIT);//
 
         //.limit(QUERY_LIMIT);
         registration = searchQuery.addSnapshotListener( new EventListener<QuerySnapshot>() {
@@ -930,6 +937,145 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 .limit(QUERY_LIMIT);
 
         registration = nextQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                try {
+                    if (!documentSnapshots.isEmpty()) {
+
+                        lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "nextQuery snapshots added: " + dc.getDocument().getData());
+
+                                    String tripDocumentId = dc.getDocument().getId(); // to pass the doc id to adapter
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    mTripsArrayList.add(tripSnapshot);
+
+                                    tripsListAdapter.notifyDataSetChanged();
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                    }else{
+                        Toast.makeText(TripsActivity.this, getString(R.string.no_more_trips),
+                                Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+    }
+
+    public void loadMoreResults(String orderBy, Query.Direction direction) {
+
+        Log.d(TAG, "searshQuery orderBy="+ orderBy+ "direction"+direction);
+        // Listen to database changes ////
+        Query nextSearchQuery = tripsCollRef;
+
+        Log.d(TAG, "getTransportationType= "+ search.getTransportationType());
+        if (search.hasTransportationType() && !search.getTransportationType().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is getTransportationType null or any? "+ search.getTransportationType());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("transportationType", search.getTransportationType());
+        }
+
+        Log.d(TAG, "getGender= "+ search.getGender());
+        if (search.hasGender() && !search.getGender().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasGender and not any? "+ search.getGender());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("gender", search.getGender());
+        }
+
+        Log.d(TAG, "getChat= "+ search.getChat());
+        if (search.hasChat() && !search.getChat().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasChat and not any? "+ search.getChat());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("chat", search.getChat());
+        }
+
+        Log.d(TAG, "getCursing= "+ search.getCursing());
+        if (search.hasCursing() && !search.getCursing().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasCursing and not any? "+ search.getCursing());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("cursing", search.getCursing());
+        }
+
+        Log.d(TAG, "getSmoking= "+ search.getSmoking());
+        if (search.hasSmoking() && !search.getSmoking().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasSmoking and not any? "+ search.getSmoking());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("smoking", search.getSmoking());
+        }
+
+        Log.d(TAG, "getMusic= "+ search.getMusic());
+        if (search.hasMusic() && !search.getMusic().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasMusic and not any? "+ search.getMusic());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("music", search.getMusic());
+        }
+
+        Log.d(TAG, "getDriving= "+ search.getDriving());
+        if (search.hasDriving() && !search.getDriving().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasDriving and not any? "+ search.getDriving());
+            nextSearchQuery = nextSearchQuery.whereEqualTo("driving", search.getDriving());
+        }
+
+        switch (orderBy){ //switch order by
+            case "date":
+                if(search.getFromDate() != null && search.getTillDate() != null){
+                    Log.d(TAG, "is getFromDate= "+ search.getFromDate()+"is getTillDate null? "+ search.getTillDate()) ;
+                    nextSearchQuery = nextSearchQuery.whereGreaterThanOrEqualTo("date", search.getFromDate())
+                            .whereLessThanOrEqualTo("date", search.getTillDate())
+                            .orderBy(orderBy, direction);
+                } else if (search.getFromDate() != null) {
+                    Log.d(TAG, "is getFromDate null? "+ search.getFromDate());
+                    nextSearchQuery = nextSearchQuery.whereGreaterThanOrEqualTo("date", search.getFromDate())
+                            .orderBy(orderBy, direction);
+                } else if (search.getTillDate() != null) {
+                    Log.d(TAG, "is getTillDate null? "+ search.getTillDate());
+                    nextSearchQuery = nextSearchQuery.whereLessThanOrEqualTo("date", search.getTillDate())
+                            .orderBy(orderBy, direction);
+                }
+                break;
+            case "cost":
+                if (search.getMinCost() != null && search.getMaxCost() != null) {
+                    Log.d(TAG, "is getMinCost null? "+ search.getMinCost()+ "is getMaxCost null? "+ search.getMaxCost());
+                    nextSearchQuery = nextSearchQuery.whereGreaterThanOrEqualTo("cost", search.getMinCost())
+                            .whereLessThanOrEqualTo("cost", search.getMaxCost())
+                            .orderBy(orderBy, direction);
+                }else if (search.getMinCost() != null) {
+                    Log.d(TAG, "is getMinCost null? "+ search.getMinCost());
+                    nextSearchQuery = nextSearchQuery.whereGreaterThanOrEqualTo("cost", search.getMinCost())
+                            .orderBy(orderBy, direction);
+                }else if (search.getMaxCost() != null) {
+                    Log.d(TAG, "is getMaxCost null? "+ search.getMaxCost());
+                    nextSearchQuery = nextSearchQuery.whereLessThanOrEqualTo("cost", search.getMaxCost())
+                            .orderBy(orderBy, direction);
+                }
+                break;
+            default:
+                Log.d(TAG, "search order by "+ orderBy+ " direction= "+ direction);
+                nextSearchQuery = nextSearchQuery.orderBy( orderBy, direction);
+                break;
+        }
+        nextSearchQuery = nextSearchQuery
+                .startAfter(lastVisible)
+                .limit(QUERY_LIMIT);
+
+        registration = nextSearchQuery.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot documentSnapshots,
                                 @Nullable FirebaseFirestoreException e) {
