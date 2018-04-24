@@ -24,7 +24,9 @@
     <string name="destination">Destination</string>
     <string name="current_location">Current location</string>
     <string name="trip_info_btn">Add Trip Info</string>
+    <string name="search_filter_button">Add Search Filters</string>
     <string name="add_rules">Add rules</string>
+    <string name="search">Search</string>
     <string name="post">Post</string>
     <string name="gender">Gender:</string>
     <string name="chat">Chatting:</string>
@@ -40,10 +42,16 @@
     <string name="set_trip_info">Set Trip Info</string>
     <string name="time">Starting Time</string>
     <string name="date">Date</string>
+    <string name="from_date">From:</string>
+    <string name="until_date">Until:</string>
     <string name="none">Not Specified</string>
     <string name="zero">0</string>
     <string name="label">Label</string>
     <string name="label_text">From %1$s to %2$s</string>
+    <string name="cost_min_max">Cost from %1$d to %2$d</string>
+    <string name="cost_min_val">Minimum cost: %1$d</string>
+    <string name="cost_max_val">Maximum cost: %1$d</string>
+
     <string name="post_label">Post label</string>
     <string name="label_hint">Ex: From Eiffel Tower to Moulin Rouge</string>
     <string name="route_details">Route details</string>
@@ -67,6 +75,9 @@
     <string name="cost_editText_hint">Cost that will be divided between participants</string>
     <string name="cost_floatingLabel">Local currency</string>
     <string name="distance_duration">Distance = %1$d Km | duration = %2$s</string>
+    <string name="cost_min">Minimum Cost</string>
+    <string name="cost_max">Maximum Cost</string>
+
 
 
     <!-- Warning messages and Toast -->
@@ -97,8 +108,11 @@
     <string name="loading">Loading</string>
     <string name="please_wait">Please wait</string>
     <string name="no_more_trips">No more trips</string>
+    <string name="no_trips_found">No trips found</string>
+
     <string name="see_new_post">See %1$d new trip</string>
     <string name="see_new_posts">See %1$d new trips</string>
+    <string name="search_failed">Sorry, your search failed, try again.</string>
 
     <!-- Warning messages and Toast -->
 
@@ -183,11 +197,14 @@
     <string name="any">Any</string>
     <string name="females">Females only</string>
     <string name="males">Males only</string>
+    <string name="both_men_women">Both are welcomed</string>
+
     <!-- gender type array -->
 
     <!-- music array -->
     <string name="no_music">No Music</string>
     <string name="driver">My playlist only</string>
+    <string name="other_drivers">Driver\'s playlist only</string>
     <string name="passenger">Passenger\'s playlist allowed</string>
     <!-- music array -->
 
@@ -203,6 +220,7 @@
     <string name="oldest">Oldest</string>
     <string name="lowest_cost">Lowest cost</string>
     <string name="highest_cost">Highest cost</string>
+    <string name="title_activity_search">Map</string>
     <!-- sorting array -->
 
 </resources>

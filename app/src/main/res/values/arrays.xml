@@ -32,26 +32,54 @@
         <item>@string/motorcycle</item>
         <item>@string/bus</item>
         <item>@string/boat</item>
-
     </string-array>
 
-    <string-array name="gender">
+    <string-array name="search_transportation_type">
+        <item>@string/any</item>
+        <item>@string/private_car</item>
+        <item>@string/ride_sharing</item>
+        <item>@string/taxi</item>
+        <item>@string/motorcycle</item>
+        <item>@string/bus</item>
+        <item>@string/boat</item>
+    </string-array>
+
+    <string-array name="gender_post">
+        <item>@string/both_men_women</item>
+        <item>@string/females</item>
+        <item>@string/males</item>
+    </string-array>
+
+    <string-array name="gender_search">
         <item>@string/any</item>
         <item>@string/females</item>
         <item>@string/males</item>
     </string-array>
 
     <string-array name="music">
+        <item>@string/none</item>
         <item>@string/no_music</item>
         <item>@string/driver</item>
         <item>@string/passenger</item>
+    </string-array>
 
+    <string-array name="music_any">
+        <item>@string/any</item>
+        <item>@string/no_music</item>
+        <item>@string/other_drivers</item>
+        <item>@string/passenger</item>
     </string-array>
 
     <string-array name="driving">
+        <item>@string/none</item>
         <item>@string/safe_driving</item>
         <item>@string/rash_driving</item>
+    </string-array>
 
+    <string-array name="driving_any">
+        <item>@string/any</item>
+        <item>@string/safe_driving</item>
+        <item>@string/rash_driving</item>
     </string-array>
 
     <string-array name="sort">
@@ -62,6 +90,32 @@
         <item>@string/lowest_cost</item>
         <item>@string/highest_cost</item>
 
+    </string-array>
+
+    <string-array name="spinner_welcomed_search">
+        <item>@string/any</item>
+        <item>@string/welcomed</item>
+        <item>@string/not_welcomed</item>
+
+    </string-array>
+
+    <string-array name="spinner_allowed_search">
+        <item>@string/any</item>
+        <item>@string/allowed</item>
+        <item>@string/not_allowed</item>
+    </string-array>
+
+    <string-array name="spinner_welcomed_post">
+        <item>@string/none</item>
+        <item>@string/welcomed</item>
+        <item>@string/not_welcomed</item>
+
+    </string-array>
+
+    <string-array name="spinner_allowed_post">
+        <item>@string/none</item>
+        <item>@string/allowed</item>
+        <item>@string/not_allowed</item>
     </string-array>
 
 </resources>

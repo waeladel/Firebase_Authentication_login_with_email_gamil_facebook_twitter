@@ -22,12 +22,14 @@
         android:id="@+id/transportation_type_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:entries="@array/transportation_type"
+        android:entries="@array/search_transportation_type"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBaseline_toBaselineOf="@+id/typeText"
         android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintLeft_toRightOf="@+id/typeText"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintHorizontal_bias="0.0" />
 
     <TextView

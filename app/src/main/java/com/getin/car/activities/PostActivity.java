@@ -188,7 +188,7 @@ public class PostActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mOrigin !=  null && mDestination != null && encodedPoly != null){
                     trip.setOrigin(latLngToGeoPoint(mOrigin));
                     trip.setDestination(latLngToGeoPoint(mDestination));
-                    //trip.setPolyline(encodedPoly);
+                    trip.setPolyline(encodedPoly);
                     Log.i(TAG, "mOrigin name: "+mOriginName + "mDestination name= "+ mDestinationName);
                     Log.i(TAG, "mOrigin address: "+mOriginAddress + "mDestination address= "+ mDestinationAddress);
                     Log.i(TAG, "setPolyline: "+encodedPoly);

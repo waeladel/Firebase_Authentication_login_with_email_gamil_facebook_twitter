@@ -49,7 +49,13 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         holder.labelText.setText(TripsArrayList.get(position).getLabel());
-        holder.cost.setText(String.format(Locale.getDefault(),"%d", TripsArrayList.get(position).getCost()));
+
+        if(TripsArrayList.get(position).getCost() != null){
+            holder.cost.setText(String.format(Locale.getDefault(),"%d", TripsArrayList.get(position).getCost()));
+        }else{
+            holder.cost.setText(R.string.none);
+            //holder.carIcon.setImageResource(R.drawable.ic_car_grey_rounded);
+        }
 
         if(TripsArrayList.get(position).getTransportationType()!= null){
             switch (TripsArrayList.get(position).getTransportationType()) {
@@ -118,20 +124,20 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
         holder.ownerName.setText(TripsArrayList.get(position).getOwnerName());
 
 
-        if(TripsArrayList.get(position).getChat() != null){
-            if(TripsArrayList.get(position).getChat()){
+        if(TripsArrayList.get(position).getChat() != null && !TripsArrayList.get(position).getChat().equalsIgnoreCase("Any")){
+            if(TripsArrayList.get(position).getChat().equalsIgnoreCase("Yes")){
                 holder.chatIcon.setImageResource(R.drawable.ic_chat_green);
-            }else{
+            }else if (TripsArrayList.get(position).getChat().equalsIgnoreCase("No")){
                 holder.chatIcon.setImageResource(R.drawable.ic_chat_red);
             }
         }else{
             holder.chatIcon.setImageResource(R.drawable.ic_chat_grey);
         }
 
-        if(TripsArrayList.get(position).getCursing() != null){
-            if(TripsArrayList.get(position).getCursing()){
+        if(TripsArrayList.get(position).getCursing() != null && !TripsArrayList.get(position).getCursing().equalsIgnoreCase("Any")){
+            if(TripsArrayList.get(position).getCursing().equalsIgnoreCase("Yes")){
                 holder.cursingIcon.setImageResource(R.drawable.ic_swearing_green);
-            }else{
+            }else if(TripsArrayList.get(position).getCursing().equalsIgnoreCase("No")){
                 holder.cursingIcon.setImageResource(R.drawable.ic_swearing_red);
             }
         }else{
@@ -139,10 +145,10 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
 
         }
 
-        if(TripsArrayList.get(position).getSmoking() != null){
-            if(TripsArrayList.get(position).getSmoking()){
+        if(TripsArrayList.get(position).getSmoking() != null && !TripsArrayList.get(position).getSmoking().equalsIgnoreCase("Any")){
+            if(TripsArrayList.get(position).getSmoking().equalsIgnoreCase("Yes")){
                 holder.smokingIcon.setImageResource(R.drawable.ic_smoking_rooms_green);
-            }else{
+            }else if (TripsArrayList.get(position).getSmoking().equalsIgnoreCase("No")){
                 holder.smokingIcon.setImageResource(R.drawable.ic_smoke_red);
             }
         }else{
@@ -150,10 +156,9 @@ public class TripsListAdapter extends RecyclerView.Adapter<TripsListAdapter.View
 
         }
 
-
         if(TripsArrayList.get(position).getMusic()!= null){
             switch (TripsArrayList.get(position).getMusic()) {
-                case "none":
+                case "no music":
                     holder.musicIcon.setImageResource(R.drawable.ic_music_note_red_48px);
                     break;
                 case "driver":

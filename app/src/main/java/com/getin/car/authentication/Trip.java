@@ -1,6 +1,7 @@
 package com.getin.car.authentication;
 
 import android.location.Location;
+import android.text.TextUtils;
 
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
@@ -32,13 +33,13 @@ public class Trip extends TripPostId{
     private String transportationModel ;
     private int distance;
     private int duration;
-    private int cost;
+    private Integer cost;
 
 
     private String gender ;
-    private Boolean chat ;
-    private Boolean cursing ;
-    private Boolean smoking ;
+    private String chat ;
+    private String cursing ;
+    private String smoking ;
     private String music ;
     private String genre ;
     private String driving ;
@@ -146,27 +147,27 @@ public class Trip extends TripPostId{
         this.gender = gender;
     }
 
-    public Boolean getChat() {
+    public String getChat() {
         return chat;
     }
 
-    public void setChat(Boolean chat) {
+    public void setChat(String chat) {
         this.chat = chat;
     }
 
-    public Boolean getCursing() {
+    public String getCursing() {
         return cursing;
     }
 
-    public void setCursing(Boolean cursing) {
+    public void setCursing(String cursing) {
         this.cursing = cursing;
     }
 
-    public Boolean getSmoking() {
+    public String getSmoking() {
         return smoking;
     }
 
-    public void setSmoking(Boolean smoking) {
+    public void setSmoking(String smoking) {
         this.smoking = smoking;
     }
 
@@ -242,11 +243,11 @@ public class Trip extends TripPostId{
         this.duration = duration;
     }
 
-    public int getCost() {
+    public Integer getCost() {
         return cost;
     }
 
-    public void setCost(int cost) {
+    public void setCost(Integer cost) {
         this.cost = cost;
     }
 
@@ -264,6 +265,35 @@ public class Trip extends TripPostId{
 
     public void setTakenSeats(int takenSeats) {
         this.takenSeats = takenSeats;
+    }
+
+
+    public boolean hasTransportationType() {
+        return !(TextUtils.isEmpty(transportationType));
+    }
+
+    public boolean hasGender() {
+        return !(TextUtils.isEmpty(gender));
+    }
+
+    public boolean hasChat() {
+        return !(TextUtils.isEmpty(chat));
+    }
+
+    public boolean hasCursing() {
+        return !(TextUtils.isEmpty(cursing));
+    }
+
+    public boolean hasSmoking() {
+        return !(TextUtils.isEmpty(smoking));
+    }
+
+    public boolean hasMusic() {
+        return !(TextUtils.isEmpty(music));
+    }
+
+    public boolean hasDriving() {
+        return !(TextUtils.isEmpty(driving));
     }
 
     public static int TimeToInteger(AlarmTime time) {

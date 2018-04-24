@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
-import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SeekBar;
@@ -25,7 +24,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.getin.car.R;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +44,7 @@ public class TripRulesFragment extends Fragment {
 
     private static String TAG = TripRulesFragment.class.getSimpleName();
     private Button mPostButton;
-
+    private Context getActivityContext;
 
 
     private enum SettingType {
@@ -136,17 +134,12 @@ public class TripRulesFragment extends Fragment {
             public String name() { return getString(R.string.chat); }
             @Override
             public String value() {
-                if(trip.getChat() !=null){
+                if(trip.hasChat()){
                     Log.d(TAG, "getChat=" +trip.getChat());
-                    if (trip.getChat()){
-                        return getString(R.string.welcomed);
-                    }else{
-                        return getString(R.string.not_welcomed);
-                    }
+                    return trip.getChat();
                 }else{
                     return getString(R.string.none);
                 }
-
             }
             @Override
             public TripRulesFragment.SettingType type() { return SettingType.CHAT; }
@@ -158,17 +151,12 @@ public class TripRulesFragment extends Fragment {
             public String name() { return getString(R.string.cursing); }
             @Override
             public String value() {
-                if(trip.getCursing() !=null){
-                    Log.d(TAG, "getChat=" +trip.getCursing());
-                    if (trip.getCursing()){
-                        return getString(R.string.welcomed);
-                    }else{
-                        return getString(R.string.not_welcomed);
-                    }
+                if(trip.hasCursing()){
+                    Log.d(TAG, "getCursing=" +trip.getCursing());
+                    return trip.getCursing();
                 }else{
                     return getString(R.string.none);
                 }
-
             }
             @Override
             public TripRulesFragment.SettingType type() { return SettingType.CURSING; }
@@ -180,17 +168,13 @@ public class TripRulesFragment extends Fragment {
             public String name() { return getString(R.string.smoking); }
             @Override
             public String value() {
-                if(trip.getSmoking() !=null){
-                    Log.d(TAG, "getChat=" +trip.getSmoking());
-                    if (trip.getSmoking()){
-                        return getString(R.string.allowed);
-                    }else{
-                        return getString(R.string.not_allowed);
-                    }
+
+                if(trip.hasSmoking()){
+                    Log.d(TAG, "getSmoking=" +trip.getSmoking());
+                    return trip.getSmoking();
                 }else{
                     return getString(R.string.none);
                 }
-
             }
             @Override
             public TripRulesFragment.SettingType type() { return SettingType.SMOKING; }
@@ -203,7 +187,7 @@ public class TripRulesFragment extends Fragment {
             @Override
             public String value() {
                 if (trip.getDriving() != null) {
-                    Log.d(TAG, "getGender=" + trip.getDriving());
+                    Log.d(TAG, "getDriving=" + trip.getDriving());
                     return trip.getDriving();
                 } else {
                     return getString(R.string.none);
@@ -222,9 +206,11 @@ public class TripRulesFragment extends Fragment {
             public String name() { return getString(R.string.music); }
             @Override
             public String value() {
-                if (trip.getMusic() != null) {
+                if (trip.hasMusic()) {
                     switch (trip.getMusic()){ // display mode spinner value from shared preference
-                        case "none":
+                        case "not specified":
+                            return getString(R.string.none);
+                        case "no music":
                             return getString(R.string.no_music);
                         case "driver":
                             if(trip.getGenre() != null){
@@ -273,6 +259,7 @@ public class TripRulesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        getActivityContext = context;
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -353,19 +340,25 @@ public class TripRulesFragment extends Fragment {
 
                     if(trip.getMusic()!= null){
                         switch (trip.getMusic()){ // display mode spinner value from shared preference
-                            case "none":
+                            case "not specified":
                                 musicSpinner.setSelection(0);
                                 genre.setEnabled(false);
                                 genre.setHint(R.string.disabled);
                                 genre.setText(null);
                                 break;
-                            case "driver":
+                            case "no music":
                                 musicSpinner.setSelection(1);
+                                genre.setEnabled(false);
+                                genre.setHint(R.string.disabled);
+                                genre.setText(null);
+                                break;
+                            case "driver":
+                                musicSpinner.setSelection(2);
                                 genre.setEnabled(true);
                                 genre.setHint(R.string.music_genre_hint);
                                 break;
                             case "passenger":
-                                musicSpinner.setSelection(2);
+                                musicSpinner.setSelection(3);
                                 genre.setEnabled(true);
                                 genre.setHint(R.string.music_genre_hint);
                                 break;
@@ -382,15 +375,22 @@ public class TripRulesFragment extends Fragment {
                                     genre.setEnabled(false);
                                     genre.setHint(R.string.disabled);
                                     genre.setText(null);
-                                    Log.d(TAG, "none spinner selected");
+                                    Log.d(TAG, "not specified selected");
                                     break;
                                 case 1:
+                                    //trip.setMusic("none");
+                                    genre.setEnabled(false);
+                                    genre.setHint(R.string.disabled);
+                                    genre.setText(null);
+                                    Log.d(TAG, "no music spinner selected");
+                                    break;
+                                case 2:
                                     //trip.setMusic("driver");
                                     genre.setEnabled(true);
                                     genre.setHint(R.string.music_genre_hint);
                                     Log.d(TAG, "driver spinner selected");
                                     break;
-                                case 2:
+                                case 3:
                                     //trip.setMusic("passenger");
                                     genre.setEnabled(true);
                                     genre.setHint(R.string.music_genre_hint);
@@ -420,22 +420,29 @@ public class TripRulesFragment extends Fragment {
                     nameBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if(genre.getText() != null){
-                                trip.setGenre(genre.getText().toString());
+                            if(genre.getEditableText() != null && !TextUtils.isEmpty(genre.getEditableText())){
+                                trip.setGenre(genre.getEditableText().toString());
+                            }else{
+                                trip.setGenre(null);
+                                Log.d(TAG, "set setGenre to null");
+
                             }
 
                             switch (musicSpinner.getSelectedItemPosition()){ //switch quality spinner position
                                 case 0:
-                                    trip.setMusic("none");
+                                    trip.setMusic("not specified");
                                     break;
                                 case 1:
-                                    trip.setMusic("driver");
+                                    trip.setMusic("no music");
                                     break;
                                 case 2:
+                                    trip.setMusic("driver");
+                                    break;
+                                case 3:
                                     trip.setMusic("passenger");
                                     break;
                                 default:
-                                    trip.setMusic("none");
+                                    trip.setMusic("not specified");
                                     break;
 
                             }
@@ -458,9 +465,6 @@ public class TripRulesFragment extends Fragment {
         }
 
     }
-
-
-
     /**
      * A helper interface to encapsulate the data displayed in the list view of
      * this activity.  Consists of a setting name, a setting value, and a type.
@@ -493,22 +497,15 @@ public class TripRulesFragment extends Fragment {
             LayoutInflater inflater = getLayoutInflater();
 
             switch (settingsObjects.get(position).type()) {
-                case GENDER:
-                    convertView = inflater.inflate(R.layout.spinner_gender_item, parent,
-                            false);
-
-                    break;
-                case DRIVING:
-                    Log.d(TAG, "DRIVING View=" );
-                    convertView = inflater.inflate(R.layout.spinner_driving_item, parent,
-                            false);
-
-                    break;
-                default:
+                case MUSIC:
+                    Log.d(TAG, "MUSIC View=" );
                     convertView = inflater.inflate(R.layout.toggled_settings_item, parent,
                             false);
                     break;
-
+                default:
+                    convertView = inflater.inflate(R.layout.spinner_item, parent,
+                            false);
+                    break;
             }
 
             holder = new ViewHolder(convertView);
@@ -541,6 +538,8 @@ public class TripRulesFragment extends Fragment {
 
         private SwitchCompat ruleSwitch;
 
+        ArrayAdapter<CharSequence> spinnerAdapter;
+
         ViewHolder(View row) {
             this.row = row;
         }
@@ -552,8 +551,13 @@ public class TripRulesFragment extends Fragment {
                 case GENDER:
                     Spinner genderSpinner = (Spinner) row.findViewById(
                             R.id.setting_spinner_sc);
-                    Log.d(TAG, "GENDER ="+trip.getGender() );
 
+                    spinnerAdapter = ArrayAdapter.createFromResource(getActivityContext,
+                            R.array.gender_post, android.R.layout.simple_spinner_item);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    genderSpinner.setAdapter(spinnerAdapter);
+
+                    Log.d(TAG, "GENDER ="+trip.getGender() );
                     if(trip.getGender()!= null){
                         switch (trip.getGender()){ // display mode spinner value from shared preference
                             case "Any":
@@ -598,118 +602,184 @@ public class TripRulesFragment extends Fragment {
 
                     });
 
-                    /*switch (genderSpinner.getSelectedItemPosition()) { //switch quality spinner position
-
-                        case 0:
-                            trip.setGender("Any");
-                            Log.d(TAG, "genderSpinner Any="+trip.getGender() );
-
-                            break;
-                        case 1:
-                            trip.setGender("Females only");
-                            Log.d(TAG, "genderSpinner Females="+trip.getGender() );
-
-                            break;
-                        case 2:
-                            trip.setGender("Males only");
-                            Log.d(TAG, "genderSpinner Males="+trip.getGender() );
-
-                            break;
-                    }*/
                     ((TextView) row.findViewById(R.id.setting_value)).
                             setText(setting.value());
 
                     settingsAdapter.notifyDataSetChanged();
                     break;
                 case CHAT:
-                    ruleSwitch = (SwitchCompat) row.findViewById(
-                            R.id.setting_toggle_sc);
+                    Spinner chatSpinner = (Spinner) row.findViewById(
+                            R.id.setting_spinner_sc);
+                    Log.d(TAG, "getChat ="+trip.getChat() );
 
-                    if(trip.getChat()!= null){
-                        if (trip.getChat()) {
-                            ruleSwitch.setChecked(true);
-                        } else {
-                            ruleSwitch.setChecked(false);
+                    spinnerAdapter = ArrayAdapter.createFromResource(getActivityContext,
+                            R.array.spinner_welcomed_post, android.R.layout.simple_spinner_item);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    chatSpinner.setAdapter(spinnerAdapter);
+
+                    if(trip.hasChat()){
+                        switch (trip.getChat()){ // display mode spinner value from shared preference
+                            case "Any":
+                                chatSpinner.setSelection(0);
+                                break;
+                            case "Yes":
+                                chatSpinner.setSelection(1);
+                                break;
+                            case "No":
+                                chatSpinner.setSelection(2);
+                                break;
                         }
                     }
 
-                    ruleSwitch.setOnCheckedChangeListener(
-                            new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    if (isChecked) {
-                                        trip.setChat(true);
-                                        Log.d(TAG, "setChat = " + true);
-                                    } else {
-                                        trip.setChat(false);
-                                        Log.d(TAG, "setChat = " + false);
-                                    }
-                                    settingsAdapter.notifyDataSetChanged();
-                                }
-                            });
+                    chatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                            switch (position){ //switch quality spinner position
+                                case 0:
+                                    trip.setChat("Any");
+                                    Log.d(TAG, "chatSpinner Any="+trip.getChat() );
+
+                                    break;
+                                case 1:
+                                    trip.setChat("Yes");
+                                    Log.d(TAG, "chatSpinner="+trip.getChat() );
+
+                                    break;
+                                case 2:
+                                    trip.setChat("No");
+                                    Log.d(TAG, "chatSpinner="+trip.getChat() );
+
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+
+                    });
+
                     ((TextView) row.findViewById(R.id.setting_value)).
                             setText(setting.value());
+
+                    settingsAdapter.notifyDataSetChanged();
                     break;
                 case CURSING:
-                    ruleSwitch = (SwitchCompat) row.findViewById(
-                            R.id.setting_toggle_sc);
+                    Spinner cursingSpinner = (Spinner) row.findViewById(
+                            R.id.setting_spinner_sc);
+                    Log.d(TAG, "getCursing ="+trip.getCursing() );
 
-                    if(trip.getCursing()!= null){
-                        if (trip.getCursing()) {
-                            ruleSwitch.setChecked(true);
-                        } else {
-                            ruleSwitch.setChecked(false);
+                    spinnerAdapter = ArrayAdapter.createFromResource(getActivityContext,
+                            R.array.spinner_welcomed_post, android.R.layout.simple_spinner_item);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    cursingSpinner.setAdapter(spinnerAdapter);
+
+                    if(trip.hasCursing()){
+                        switch (trip.getCursing()){ // display mode spinner value from shared preference
+                            case "Any":
+                                cursingSpinner.setSelection(0);
+                                break;
+                            case "Yes":
+                                cursingSpinner.setSelection(1);
+                                break;
+                            case "No":
+                                cursingSpinner.setSelection(2);
+                                break;
                         }
                     }
 
-                    ruleSwitch.setOnCheckedChangeListener(
-                            new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    if (isChecked) {
-                                        trip.setCursing(true);
-                                        Log.d(TAG, "setCursing = " + true);
+                    cursingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
-                                    } else {
-                                        trip.setCursing(false);
-                                        Log.d(TAG, "setCursing = " + false);
-                                    }
-                                    settingsAdapter.notifyDataSetChanged();
-                                }
-                            });
+                            switch (position){ //switch quality spinner position
+                                case 0:
+                                    trip.setCursing("Any");
+                                    Log.d(TAG, "cursingSpinner Any="+trip.getChat() );
+                                    break;
+                                case 1:
+                                    trip.setCursing("Yes");
+                                    Log.d(TAG, "cursingSpinner="+trip.getChat() );
+                                    break;
+                                case 2:
+                                    trip.setCursing("No");
+                                    Log.d(TAG, "cursingSpinner="+trip.getChat() );
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+
+                    });
+
                     ((TextView) row.findViewById(R.id.setting_value)).
                             setText(setting.value());
+
+                    settingsAdapter.notifyDataSetChanged();
                     break;
                 case SMOKING:
-                    ruleSwitch = (SwitchCompat) row.findViewById(
-                            R.id.setting_toggle_sc);
+                    Spinner smokingSpinner = (Spinner) row.findViewById(
+                            R.id.setting_spinner_sc);
+                    Log.d(TAG, "getSmoking ="+trip.getSmoking() );
 
-                    if(trip.getSmoking()!= null){
-                        if (trip.getSmoking()) {
-                            ruleSwitch.setChecked(true);
-                        } else {
-                            ruleSwitch.setChecked(false);
+                    spinnerAdapter = ArrayAdapter.createFromResource(getActivityContext,
+                            R.array.spinner_allowed_post, android.R.layout.simple_spinner_item);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    smokingSpinner.setAdapter(spinnerAdapter);
+
+                    if(trip.hasSmoking()){
+                        switch (trip.getSmoking()){ // display mode spinner value from shared preference
+                            case "Any":
+                                smokingSpinner.setSelection(0);
+                                break;
+                            case "Yes":
+                                smokingSpinner.setSelection(1);
+                                break;
+                            case "No":
+                                smokingSpinner.setSelection(2);
+                                break;
                         }
                     }
-                    ruleSwitch.setOnCheckedChangeListener(
-                            new CompoundButton.OnCheckedChangeListener() {
-                                @Override
-                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                    if (isChecked) {
-                                        trip.setSmoking(true);
-                                        Log.d(TAG, "setSmoking = " + true);
 
-                                    } else {
-                                        trip.setSmoking(false);
-                                        Log.d(TAG, "setSmoking = " + false);
-                                    }
-                                    settingsAdapter.notifyDataSetChanged();
-                                }
-                            });
+                    smokingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+
+                            switch (position){ //switch quality spinner position
+                                case 0:
+                                    trip.setSmoking("Any");
+                                    Log.d(TAG, "smokingSpinner Any="+trip.getSmoking() );
+                                    break;
+                                case 1:
+                                    trip.setSmoking("Yes");
+                                    Log.d(TAG, "smokingSpinner="+trip.getSmoking() );
+                                    break;
+                                case 2:
+                                    trip.setSmoking("No");
+                                    Log.d(TAG, "smokingSpinner="+trip.getSmoking() );
+                                    break;
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // your code here
+                        }
+
+                    });
+
                     ((TextView) row.findViewById(R.id.setting_value)).
                             setText(setting.value());
+
+                    settingsAdapter.notifyDataSetChanged();
                     break;
                 case MUSIC:
+
                     ruleSwitch = (SwitchCompat) row.findViewById(
                             R.id.setting_toggle_sc);
                     ruleSwitch.setVisibility(View.GONE);
@@ -720,15 +790,23 @@ public class TripRulesFragment extends Fragment {
                 case DRIVING:
                     Spinner drivingSpinner = (Spinner) row.findViewById(
                             R.id.setting_spinner_sc);
-                    Log.d(TAG, "GENDER ="+trip.getDriving() );
+                    Log.d(TAG, "getDriving ="+trip.getDriving() );
 
-                    if(trip.getDriving()!= null){
+                    spinnerAdapter = ArrayAdapter.createFromResource(getActivityContext,
+                            R.array.driving, android.R.layout.simple_spinner_item);
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    drivingSpinner.setAdapter(spinnerAdapter);
+
+                    if(trip.hasDriving()){
                         switch (trip.getDriving()){ // display mode spinner value from shared preference
-                            case "Safe driving":
+                            case "Not Specified":
                                 drivingSpinner.setSelection(0);
                                 break;
-                            case "Rash driving":
+                            case "Safe driving":
                                 drivingSpinner.setSelection(1);
+                                break;
+                            case "Rash driving":
+                                drivingSpinner.setSelection(2);
                                 break;
                         }
                     }
@@ -739,11 +817,14 @@ public class TripRulesFragment extends Fragment {
 
                             switch (position){ //switch quality spinner position
                                 case 0:
-                                    trip.setDriving("Safe driving");
+                                    trip.setDriving("Not Specified");
                                     Log.d(TAG, "setDriving="+trip.getDriving() );
-
                                     break;
                                 case 1:
+                                    trip.setDriving("Safe driving");
+                                    Log.d(TAG, "setDriving="+trip.getDriving() );
+                                    break;
+                                case 2:
                                     trip.setDriving("Rash driving");
                                     Log.d(TAG, "setDriving="+trip.getDriving() );
                                     break;

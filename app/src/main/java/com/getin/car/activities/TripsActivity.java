@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -65,6 +66,8 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     private final static String TAG = TripsActivity.class.getSimpleName();
     private static final int REQUEST_INVITE = 13;
+    private static final int SEARCH_REQUEST_CODE = 63;
+
 
     //initialize the FirebaseAuth instance
     private static FirebaseAuth mAuth;
@@ -87,20 +90,20 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
     private Trip tripSnapshot;
 
-    private static final int QUERY_LIMIT = 3;
+    private static final int QUERY_LIMIT = 25;
     private DocumentSnapshot lastVisible;
     private Boolean isFirstPageFirstLoad = true; // to display other users's posts on top because it's recent
+    private Boolean isSearchActive = false; // to stop reach bottom from loading more next query if the search is empty
 
     private SharedPreferences mTripsPreference;
     private SharedPreferences.Editor editor;
     private Spinner mSortSpinner;
+    private ImageButton mSearchButton;
 
     private CardView mSeeNewCardView;
     private TextView mSeeNewText;
     private ListenerRegistration registration;
     private List<Integer> mNewPostsCounts;
-
-
 
 
     @Override
@@ -112,6 +115,8 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        isSearchActive = false; // declare search is false
+
         // read and write Shared Preference key values form Preference file
         mTripsPreference = PreferenceManager.getDefaultSharedPreferences(this);
         //save Preferences
@@ -121,6 +126,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         mSortSpinner = findViewById(R.id.sort_spinner);
         mSeeNewCardView = findViewById(R.id.seeNew_cardView);
         mSeeNewText = findViewById(R.id.see_more_txt);
+        mSearchButton = findViewById(R.id.search_btn);
 
         mNewPostsCounts = new ArrayList<Integer>();// to add the new posts count to list
 
@@ -188,7 +194,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 0 selected");
                         isFirstPageFirstLoad = true;
-                        setFirstQuery("date" , Query.Direction.ASCENDING);
+                        if(isSearchActive){// check if should load first query or search query
+                            setSearchQuery("date" , Query.Direction.ASCENDING);
+                        }else{
+                            setFirstQuery("date" , Query.Direction.ASCENDING);
+                        }
                         break;
                     case 1:
                         editor.putInt("sortingID", 1);
@@ -197,7 +207,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 1 selected");
                         isFirstPageFirstLoad = true;
-                        setFirstQuery("date" , Query.Direction.DESCENDING);
+                        if(isSearchActive){// check if should load first query or search query
+                            setSearchQuery("date" , Query.Direction.DESCENDING);
+                        }else{
+                            setFirstQuery("date" , Query.Direction.DESCENDING);
+                        }
                         break;
                     case 2:
                         editor.putInt("sortingID", 2);
@@ -224,7 +238,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 4 selected");
                         isFirstPageFirstLoad = true;
-                        setFirstQuery("cost" , Query.Direction.ASCENDING);
+                        if(isSearchActive){// check if should load first query or search query
+                            setSearchQuery("cost" , Query.Direction.ASCENDING);
+                        }else{
+                            setFirstQuery("cost" , Query.Direction.ASCENDING);
+                        }
                         break;
                     case 5:
                         editor.putInt("sortingID", 5);
@@ -233,7 +251,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 5 selected");
                         isFirstPageFirstLoad = true;
-                        setFirstQuery("cost" , Query.Direction.DESCENDING);
+                        if(isSearchActive){// check if should load first query or search query
+                            setSearchQuery("cost" , Query.Direction.DESCENDING);
+                        }else{
+                            setFirstQuery("cost" , Query.Direction.DESCENDING);
+                        }
                         break;
                     default:
                         editor.putInt("sortingID", 0);
@@ -242,7 +264,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         editor.apply();
                         Log.d(TAG, "spinner Listener: 0 default");
                         isFirstPageFirstLoad = true;
-                        setFirstQuery("date" , Query.Direction.DESCENDING);
+                        if(isSearchActive){// check if should load first query or search query
+                            setSearchQuery("date" , Query.Direction.DESCENDING);
+                        }else{
+                            setFirstQuery("date" , Query.Direction.DESCENDING);
+                        }
                         break;
                 }
             }
@@ -280,12 +306,26 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
 
                 Boolean reachedBottom = !recyclerView.canScrollVertically(1);
 
-                if(reachedBottom){
+                if(reachedBottom && !isSearchActive){
                     Log.d(TAG, "reached Bottom" );
                     String direction = mTripsPreference.getString("direction", "descending");
                     String orderBy = mTripsPreference.getString("orderBy", "date");
                     loadMorePost(orderBy, getSortDirection(direction));
                 }
+
+            }
+        });
+
+        // set onclick listner for search button//
+        mSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mIntent = new Intent(TripsActivity.this, SearchActivity.class);
+                //mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                //mIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                //mIntent.putExtra("key", value); //Optional parameters
+                //startActivity(mIntent);
+                startActivityForResult(mIntent, SEARCH_REQUEST_CODE);
 
             }
         });
@@ -447,6 +487,19 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 // Sending failed or it was canceled, show failure message to the user
                 // ...
             }
+        }else if(requestCode == SEARCH_REQUEST_CODE){
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG, "onActivityResult search succeeded");
+                isFirstPageFirstLoad = true;
+
+                // get sort by and sort direction from Preference
+                String direction = mTripsPreference.getString("direction", "descending");
+                String orderBy = mTripsPreference.getString("orderBy", "date");
+                setSearchQuery(orderBy, getSortDirection(direction));
+            } else {
+                Toast.makeText(TripsActivity.this, getString(R.string.search_failed),
+                        Toast.LENGTH_LONG).show();
+            }
         }
     }
     // [END on_activity_result]
@@ -480,6 +533,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         Log.d(TAG, "onDestroy()");
 
     }
+
 
     @Override
     public void onFragmentInteraction(String FragmentName) {// listens to login fragments buttons
@@ -524,6 +578,202 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
             default:
                 break;
         }
+    }
+
+    private void  setSearchQuery(String orderBy , Query.Direction direction){
+        // Listen to database changes ////
+       /* String direction = mTripsPreference.getString("direction", "descending");
+        String orderBy = mTripsPreference.getString("orderBy", "date");
+*/
+        Query searchQuery = tripsCollRef;
+                //.whereGreaterThanOrEqualTo("created", search.getFromDate());
+                //.whereLessThanOrEqualTo("created", search.getTillDate())
+
+        Log.d(TAG, "getTransportationType= "+ search.getTransportationType());
+        if (search.hasTransportationType() && !search.getTransportationType().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is getTransportationType null or any? "+ search.getTransportationType());
+            searchQuery = searchQuery.whereEqualTo("transportationType", search.getTransportationType());
+        }
+
+        Log.d(TAG, "getGender= "+ search.getGender());
+        if (search.hasGender() && !search.getGender().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasGender and not any? "+ search.getGender());
+            searchQuery = searchQuery.whereEqualTo("gender", search.getGender());
+        }
+
+        Log.d(TAG, "getChat= "+ search.getChat());
+        if (search.hasChat() && !search.getChat().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasChat and not any? "+ search.getChat());
+            searchQuery = searchQuery.whereEqualTo("chat", search.getChat());
+        }
+
+        Log.d(TAG, "getCursing= "+ search.getCursing());
+        if (search.hasCursing() && !search.getCursing().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasCursing and not any? "+ search.getCursing());
+            searchQuery = searchQuery.whereEqualTo("cursing", search.getCursing());
+        }
+
+        Log.d(TAG, "getSmoking= "+ search.getSmoking());
+        if (search.hasSmoking() && !search.getSmoking().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasSmoking and not any? "+ search.getSmoking());
+            searchQuery = searchQuery.whereEqualTo("smoking", search.getSmoking());
+        }
+
+        Log.d(TAG, "getMusic= "+ search.getMusic());
+        if (search.hasMusic() && !search.getMusic().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasMusic and not any? "+ search.getMusic());
+            searchQuery = searchQuery.whereEqualTo("music", search.getMusic());
+        }
+
+        Log.d(TAG, "getDriving= "+ search.getDriving());
+        if (search.hasDriving() && !search.getDriving().equalsIgnoreCase("Any")){
+            Log.d(TAG, "is hasDriving and not any? "+ search.getDriving());
+            searchQuery = searchQuery.whereEqualTo("driving", search.getDriving());
+        }
+
+        // set order by date by default as the first order
+        /*if (search.getFromDate() != null || search.getTillDate() != null) {
+            searchQuery = searchQuery.orderBy("date" , Query.Direction.ASCENDING);
+                //.orderBy( orderBy, getSortDirection(direction));
+        } else{
+            Log.d(TAG, "search order by "+ orderBy+ " direction= "+ direction);
+            searchQuery = searchQuery.orderBy( orderBy, getSortDirection(direction));
+        }*/
+
+        //searchQuery = searchQuery.orderBy( orderBy, direction);
+
+        switch (orderBy){ //switch order by
+            case "date":
+                if(search.getFromDate() != null && search.getTillDate() != null){
+                    Log.d(TAG, "is getFromDate= "+ search.getFromDate()+"is getTillDate null? "+ search.getTillDate()) ;
+                    searchQuery = searchQuery.whereGreaterThanOrEqualTo("date", search.getFromDate())
+                            .whereLessThanOrEqualTo("date", search.getTillDate())
+                            .orderBy(orderBy, direction);
+                    //searchQuery = searchQuery.whereLessThanOrEqualTo("date", search.getTillDate());
+                    /*searchQuery = searchQuery.orderBy( "date")
+                    .startAt(search.getFromDate())
+                    .endAt(search.getTillDate());*/
+
+                } else if (search.getFromDate() != null) {
+                    Log.d(TAG, "is getFromDate null? "+ search.getFromDate());
+                    searchQuery = searchQuery.whereGreaterThanOrEqualTo("date", search.getFromDate())
+                            .orderBy(orderBy, direction);
+            /*searchQuery = searchQuery.orderBy( "date")
+                    .startAt(search.getFromDate());*/
+                } else if (search.getTillDate() != null) {
+                    Log.d(TAG, "is getTillDate null? "+ search.getTillDate());
+                    searchQuery = searchQuery.whereLessThanOrEqualTo("date", search.getTillDate())
+                            .orderBy(orderBy, direction);
+            /*searchQuery = searchQuery.orderBy( "date")
+                    .endAt(search.getTillDate());*/
+                }
+                break;
+            case "cost":
+                if (search.getMinCost() != null && search.getMaxCost() != null) {
+                    Log.d(TAG, "is getMinCost null? "+ search.getMinCost()+ "is getMaxCost null? "+ search.getMaxCost());
+                    searchQuery = searchQuery.whereGreaterThanOrEqualTo("cost", search.getMinCost())
+                            .whereLessThanOrEqualTo("cost", search.getMaxCost())
+                            .orderBy(orderBy, direction);
+                    /*searchQuery = searchQuery.orderBy( "cost", direction)
+                            .startAt(search.getMinCost())
+                            .endAt(search.getMaxCost());*/
+                }else if (search.getMinCost() != null) {
+                    Log.d(TAG, "is getMinCost null? "+ search.getMinCost());
+                    searchQuery = searchQuery.whereGreaterThanOrEqualTo("cost", search.getMinCost())
+                            .orderBy(orderBy, direction);
+                    /*searchQuery = searchQuery.orderBy( "cost", direction)
+                            .startAt(search.getMinCost());*/
+                }else if (search.getMaxCost() != null) {
+                    Log.d(TAG, "is getMaxCost null? "+ search.getMaxCost());
+                    searchQuery = tripsCollRef.whereLessThanOrEqualTo("cost", search.getMaxCost())
+                            .orderBy(orderBy, direction);
+                    /*searchQuery = searchQuery.orderBy( "cost", direction)
+                            .endAt(search.getMaxCost());*/
+                }
+                break;
+            default:
+                Log.d(TAG, "search order by "+ orderBy+ " direction= "+ direction);
+                searchQuery = searchQuery.orderBy( orderBy, direction);
+                break;
+        }
+
+        //.limit(QUERY_LIMIT);
+        registration = searchQuery.addSnapshotListener( new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot documentSnapshots,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "listen:error", e);
+                    return;
+                }
+
+                isSearchActive = true;
+
+                try {
+                    if (!documentSnapshots.isEmpty()) {
+                        Log.d(TAG, "searchQuery documentSnapshots.size="+ documentSnapshots.size());
+
+                        if (isFirstPageFirstLoad) {
+
+                            lastVisible = documentSnapshots.getDocuments().get(documentSnapshots.size() - 1);
+                            mTripsArrayList.clear();
+                        }
+
+                        for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "searchQuery snapshots added: " + dc.getDocument().getData());
+
+                                    String tripDocumentId = dc.getDocument().getId();
+
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+
+                                    if (isFirstPageFirstLoad) {
+                                        Log.d(TAG, "searchQuery loaded for the first time ");
+                                        mTripsArrayList.add(tripSnapshot);
+                                        tripsListAdapter.notifyDataSetChanged();
+                                    } else {
+                                        Log.d(TAG, "searchQuery loaded for the second time ");
+                                        mNewPostsCounts.add(1); // add new post to the counter
+
+                                        if (mNewPostsCounts.size() <= 1) {// for singular
+                                            mSeeNewText.setText(getString(R.string.see_new_post, mNewPostsCounts.size()));
+                                        }else{  // for plural
+                                            mSeeNewText.setText(getString(R.string.see_new_posts, mNewPostsCounts.size()));
+                                        }
+                                        mSeeNewCardView.setVisibility(View.VISIBLE);
+                                        mTripsArrayList.add(0, tripSnapshot);
+                                        //tripsListAdapter.notifyDataSetChanged();
+                                        Log.d(TAG, "mNewPostsCounts.size= " +mNewPostsCounts.size());
+                                    }
+
+                                    break;
+                                case MODIFIED:
+                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+
+                        isFirstPageFirstLoad = false;
+                    }else{
+                        Log.d(TAG, "searchQuery is Empty");
+                        Toast.makeText(TripsActivity.this, getString(R.string.no_trips_found),
+                                Toast.LENGTH_LONG).show();
+                        mTripsArrayList.clear();
+                        tripsListAdapter.notifyDataSetChanged();
+
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        });
+
     }
 
     private void  setFirstQuery(String orderBy , Query.Direction direction){

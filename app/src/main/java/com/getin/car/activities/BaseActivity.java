@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.getin.car.R;
+import com.getin.car.authentication.Search;
 import com.getin.car.authentication.Trip;
 import com.getin.car.fragments.CompleteProfileFragment;
 import com.getin.car.fragments.EditProfileFragment;
@@ -68,6 +69,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     //public DocumentReference UserDocRef ;
     public CollectionReference usersColRef;
     public static Trip trip;
+    public static Search search;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +102,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         //create trip object
         trip = new Trip();
+        search = new Search();
 
         // [START google Clint]
         mGoogleApiClient = new GoogleApiClient.Builder(this)

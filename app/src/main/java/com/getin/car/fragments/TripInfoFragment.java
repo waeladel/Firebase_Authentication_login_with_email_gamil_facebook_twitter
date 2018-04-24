@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -194,7 +195,7 @@ public class TripInfoFragment extends Fragment implements
             public String name() { return getString(R.string.cost_dialogue_title); }
             @Override
             public String value() {
-                if(trip.getCost() != 0){
+                if(trip.getCost() != null){
                     Log.d(TAG, "getCost" + trip.getCost());
                     return Integer.toString(trip.getCost());
                 }else{
@@ -456,8 +457,13 @@ public class TripInfoFragment extends Fragment implements
                     nameBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            trip.setSeats(Integer.parseInt(label.getEditableText().toString()));
-                            trip.setFreeSeats(Integer.parseInt(label.getEditableText().toString()));
+                            if(!TextUtils.isEmpty(label.getEditableText())){
+                                trip.setSeats(Integer.parseInt(label.getEditableText().toString()));
+                                trip.setFreeSeats(Integer.parseInt(label.getEditableText().toString()));
+                            }else{
+                                trip.setSeats(0);
+                                trip.setFreeSeats(0);
+                            }
                             trip.setTakenSeats(0);
                             settingsAdapter.notifyDataSetChanged();
                             dismiss();
@@ -539,23 +545,26 @@ public class TripInfoFragment extends Fragment implements
 
                     if(trip.getTransportationType()!= null){
                         switch (trip.getTransportationType()){ // display mode spinner value from shared preference
-                            case "Private car":
+                            case "Any":
                                 transportationType.setSelection(0);
                                 break;
-                            case "Ride sharing service":
+                            case "Private car":
                                 transportationType.setSelection(1);
                                 break;
-                            case "Taxi":
+                            case "Ride sharing service":
                                 transportationType.setSelection(2);
                                 break;
-                            case "Motorcycle":
+                            case "Taxi":
                                 transportationType.setSelection(3);
                                 break;
-                            case "Bus":
+                            case "Motorcycle":
                                 transportationType.setSelection(4);
                                 break;
-                            case "Boat":
+                            case "Bus":
                                 transportationType.setSelection(5);
+                                break;
+                            case "Boat":
+                                transportationType.setSelection(6);
                                 break;
                         }
                     }
@@ -565,22 +574,22 @@ public class TripInfoFragment extends Fragment implements
                         public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
                             switch (position){ //switch quality spinner position
-                                case 1:
+                                case 2:
                                     label.setHint(R.string.transportation_service_hint);
                                     serviceLabel.setText(R.string.transportation_service_title);
                                     Log.d(TAG, "ride_sharing spinner selected");
                                     break;
-                                case 2:
+                                case 3:
                                     label.setHint(R.string.transportation_texi_hint);
                                     serviceLabel.setText("");
                                     Log.d(TAG, "Taxi spinner selected");
                                     break;
-                                case 4:
+                                case 5:
                                     label.setHint(R.string.transportation_Bus_hint);
                                     serviceLabel.setText("");
                                     Log.d(TAG, "Bus spinner selected");
                                     break;
-                                case 5:
+                                case 6:
                                     label.setHint(R.string.transportation_boat_hint);
                                     serviceLabel.setText("");
                                     Log.d(TAG, "Bus spinner selected");
@@ -610,25 +619,36 @@ public class TripInfoFragment extends Fragment implements
                     nameBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            trip.setTransportationModel(label.getEditableText().toString());
+
+                            if(label.getEditableText() != null && !TextUtils.isEmpty(label.getEditableText())){
+                                trip.setTransportationModel(label.getEditableText().toString());
+                            }else{
+                                trip.setTransportationModel(null);
+                                Log.d(TAG, "set TransportationModel to null");
+
+                            }
+
 
                             switch (transportationType.getSelectedItemPosition()){ //switch quality spinner position
                                 case 0:
-                                    trip.setTransportationType("Private car");
+                                    trip.setTransportationType("Any");
                                     break;
                                 case 1:
-                                    trip.setTransportationType("Ride sharing service");
+                                    trip.setTransportationType("Private car");
                                     break;
                                 case 2:
-                                    trip.setTransportationType("Taxi");
+                                    trip.setTransportationType("Ride sharing service");
                                     break;
                                 case 3:
-                                    trip.setTransportationType("Motorcycle");
+                                    trip.setTransportationType("Taxi");
                                     break;
                                 case 4:
-                                    trip.setTransportationType("Bus");
+                                    trip.setTransportationType("Motorcycle");
                                     break;
                                 case 5:
+                                    trip.setTransportationType("Bus");
+                                    break;
+                                case 6:
                                     trip.setTransportationType("Boat");
                                     break;
                             }
@@ -648,7 +668,7 @@ public class TripInfoFragment extends Fragment implements
                     nameView = View.inflate(getActivity(),
                             R.layout.cost_settings_dialog, null);
                     costLabel = (MaterialEditText) nameView.findViewById(R.id.cost_editText);
-                    if(trip.getCost()!=0){
+                    if(trip.getCost()!=null){
                         costLabel.setText(String.valueOf(trip.getCost()));
                     }
                     secToHours(trip.getDistance());
@@ -660,7 +680,11 @@ public class TripInfoFragment extends Fragment implements
                     nameBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            trip.setCost(Integer.parseInt(costLabel.getEditableText().toString()));
+                            if(!TextUtils.isEmpty(costLabel.getEditableText())){
+                                trip.setCost(Integer.parseInt(costLabel.getEditableText().toString()));
+                            }else{
+                                trip.setCost(null);
+                            }
                             settingsAdapter.notifyDataSetChanged();
                             dismiss();
                         }

@@ -26,9 +26,11 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!--android:name=".App"
-    android:name="android.support.multidex.MultiDexApplication"-->
 
+    <!--
+    android:name=".App"
+    android:name="android.support.multidex.MultiDexApplication"
+    -->
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -102,7 +104,10 @@
 
         <activity
             android:name=".activities.PostActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".activities.SearchActivity"
+            android:label="@string/title_activity_search"></activity>
     </application>
 
 </manifest>
