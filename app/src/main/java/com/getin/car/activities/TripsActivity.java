@@ -213,7 +213,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                             setFirstQuery("date" , Query.Direction.DESCENDING);
                         }
                         break;
-                    case 2:
+                    /*case 2:
                         editor.putInt("sortingID", 2);
                         editor.putString("orderBy", "created");
                         editor.putString("direction", "descending");
@@ -230,9 +230,9 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         Log.d(TAG, "spinner Listener: 3 selected");
                         isFirstPageFirstLoad = true;
                         setFirstQuery("created" , Query.Direction.ASCENDING);
-                        break;
-                    case 4:
-                        editor.putInt("sortingID", 4);
+                        break;*/
+                    case 2:
+                        editor.putInt("sortingID", 2);
                         editor.putString("orderBy", "cost");
                         editor.putString("direction", "ascending");
                         editor.apply();
@@ -244,8 +244,8 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                             setFirstQuery("cost" , Query.Direction.ASCENDING);
                         }
                         break;
-                    case 5:
-                        editor.putInt("sortingID", 5);
+                    case 3:
+                        editor.putInt("sortingID", 3);
                         editor.putString("orderBy", "cost");
                         editor.putString("direction", "descending");
                         editor.apply();

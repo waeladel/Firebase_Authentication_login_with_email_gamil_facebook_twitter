@@ -85,8 +85,8 @@
     <string-array name="sort">
         <item>@string/start_sooner</item>
         <item>@string/start_later</item>
-        <item>@string/newest</item>
-        <item>@string/oldest</item>
+        <!--<item>@string/newest</item>
+        <item>@string/oldest</item>-->
         <item>@string/lowest_cost</item>
         <item>@string/highest_cost</item>
 
