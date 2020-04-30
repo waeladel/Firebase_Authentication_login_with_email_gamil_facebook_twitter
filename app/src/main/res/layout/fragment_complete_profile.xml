@@ -11,7 +11,7 @@
     <!-- TODO: Update blank fragment layout -->
 
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/holo_orange_light"
@@ -119,7 +119,7 @@
             app:layout_constraintTop_toBottomOf="@+id/gender_spinner"
             app:layout_constraintVertical_bias="1.0" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </ScrollView >

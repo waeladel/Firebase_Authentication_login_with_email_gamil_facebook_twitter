@@ -7,11 +7,11 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.text.InputType;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.AlertDialog;
+
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -28,7 +28,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.getin.car.R;
-import com.getin.car.authentication.Search;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;

@@ -5,24 +5,21 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.fragment.app.FragmentTransaction;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,11 +50,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
-import static com.google.firebase.firestore.DocumentChange.Type.ADDED;
 //import com.twitter.sdk.android.Twitter;
 
 public class TripsActivity extends BaseActivity implements CompleteProfileFragment.OnFragmentInteractionListener
@@ -89,8 +84,8 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
     private CollectionReference tripsCollRef;
 
     private Trip tripSnapshot;
-
-    private static final int QUERY_LIMIT = 3; //25
+    private String tripDocumentId ;
+    private static final int QUERY_LIMIT = 100; //25
     private DocumentSnapshot lastVisible;
     private Boolean isFirstPageFirstLoad = true; // to display other users's posts on top because it's recent
     private Boolean isSearchActive = false; // to stop reach bottom from loading more next query if the search is empty
@@ -146,6 +141,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                 Log.d(TAG, "mSeeNewCardView clicked: mNewPostsCounts.size+ "+mNewPostsCounts.size());
 
                 tripsListAdapter.notifyDataSetChanged();
+                //tripsListAdapter.notifyItemInserted(dc.getNewIndex());
 
                 // move to the top
                 LinearLayoutManager layoutManager = (LinearLayoutManager) mTripsRecycler
@@ -288,7 +284,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
         });
 
 
-            // prepare the Adapter
+        // prepare the Adapter
         mTripsArrayList = new ArrayList<>();
         tripsListAdapter = new TripsListAdapter(getApplicationContext(),mTripsArrayList);
 
@@ -731,7 +727,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                 case ADDED:
                                     Log.d(TAG, "searchQuery snapshots added: " + dc.getDocument().getData());
 
-                                    String tripDocumentId = dc.getDocument().getId();
+                                    tripDocumentId = dc.getDocument().getId();
 
                                     tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
                                     //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
@@ -758,9 +754,24 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                     break;
                                 case MODIFIED:
                                     Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    tripDocumentId = dc.getDocument().getId();
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                                    if (dc.getOldIndex() == dc.getNewIndex()) {
+                                        // Item changed but remained in same position
+                                        mTripsArrayList.set(dc.getOldIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemChanged(dc.getOldIndex());
+                                    } else {
+                                        // Item changed and changed position
+                                        mTripsArrayList.remove(dc.getOldIndex());
+                                        mTripsArrayList.add(dc.getNewIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemMoved(dc.getOldIndex(), dc.getNewIndex());
+                                    }
                                     break;
                                 case REMOVED:
                                     Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    mTripsArrayList.remove(dc.getOldIndex());
+                                    tripsListAdapter.notifyItemRemoved(dc.getOldIndex());
                                     break;
                             }
                         }
@@ -810,7 +821,7 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                         for (DocumentChange dc : documentSnapshots.getDocumentChanges()) {
                             switch (dc.getType()) {
                                 case ADDED:
-                                    Log.d(TAG, "firstQuery snapshots added: " + dc.getDocument().getData());
+                                    Log.d(TAG, "change firstQuery snapshots added: " + dc.getDocument().getData());
 
                                     String tripDocumentId = dc.getDocument().getId();
 
@@ -818,11 +829,11 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                     //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
 
                                     if (isFirstPageFirstLoad) {
-                                        Log.d(TAG, "loaded for the first time ");
+                                        Log.d(TAG, "change loaded for the first time ");
                                         mTripsArrayList.add(tripSnapshot);
                                         tripsListAdapter.notifyDataSetChanged();
                                     } else {
-                                        Log.d(TAG, "loaded for the second time ");
+                                        Log.d(TAG, "change loaded for the second time ");
                                         mNewPostsCounts.add(1); // add new post to the counter
 
                                         if (mNewPostsCounts.size() <= 1) {// for singular
@@ -833,15 +844,34 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                         mSeeNewCardView.setVisibility(View.VISIBLE);
                                         mTripsArrayList.add(0, tripSnapshot);
                                         //tripsListAdapter.notifyDataSetChanged();
-                                        Log.d(TAG, "mNewPostsCounts.size= " +mNewPostsCounts.size());
+                                        //mTripsArrayList.add(dc.getNewIndex(), tripSnapshot);
+                                        //tripsListAdapter.notifyItemInserted(dc.getNewIndex());
+                                        Log.d(TAG, "change mNewPostsCounts.size= " +mNewPostsCounts.size());
                                     }
 
                                     break;
                                 case MODIFIED:
-                                    Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    Log.d(TAG, "change Modified trip: " + dc.getDocument().getData());
+                                    tripDocumentId = dc.getDocument().getId();
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                                    if (dc.getOldIndex() == dc.getNewIndex()) {
+                                        // Item changed but remained in same position
+                                        Log.d(TAG, "change Item changed but remained in same position");
+                                        mTripsArrayList.set(dc.getOldIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemChanged(dc.getOldIndex());
+                                    } else {
+                                        // Item changed and changed position
+                                        Log.d(TAG, "change Item changed and changed position");
+                                        mTripsArrayList.remove(dc.getOldIndex());
+                                        mTripsArrayList.add(dc.getNewIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemMoved(dc.getOldIndex(), dc.getNewIndex());
+                                    }
                                     break;
                                 case REMOVED:
-                                    Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    Log.d(TAG, "change Removed trip: " + dc.getDocument().getData());
+                                    mTripsArrayList.remove(dc.getOldIndex());
+                                    tripsListAdapter.notifyItemRemoved(dc.getOldIndex());
                                     break;
                             }
                         }
@@ -966,9 +996,24 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                     break;
                                 case MODIFIED:
                                     Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    tripDocumentId = dc.getDocument().getId();
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                                    if (dc.getOldIndex() == dc.getNewIndex()) {
+                                        // Item changed but remained in same position
+                                        mTripsArrayList.set(dc.getOldIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemChanged(dc.getOldIndex());
+                                    } else {
+                                        // Item changed and changed position
+                                        mTripsArrayList.remove(dc.getOldIndex());
+                                        mTripsArrayList.add(dc.getNewIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemMoved(dc.getOldIndex(), dc.getNewIndex());
+                                    }
                                     break;
                                 case REMOVED:
                                     Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    mTripsArrayList.remove(dc.getOldIndex());
+                                    tripsListAdapter.notifyItemRemoved(dc.getOldIndex());
                                     break;
                             }
                         }
@@ -1105,9 +1150,24 @@ public class TripsActivity extends BaseActivity implements CompleteProfileFragme
                                     break;
                                 case MODIFIED:
                                     Log.d(TAG, "Modified city: " + dc.getDocument().getData());
+                                    tripDocumentId = dc.getDocument().getId();
+                                    tripSnapshot = dc.getDocument().toObject(Trip.class).withId(tripDocumentId);
+                                    //Log.d(TAG, "tripSnapshot: " + dc.getDocument().getData());
+                                    if (dc.getOldIndex() == dc.getNewIndex()) {
+                                        // Item changed but remained in same position
+                                        mTripsArrayList.set(dc.getOldIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemChanged(dc.getOldIndex());
+                                    } else {
+                                        // Item changed and changed position
+                                        mTripsArrayList.remove(dc.getOldIndex());
+                                        mTripsArrayList.add(dc.getNewIndex(), tripSnapshot);
+                                        tripsListAdapter.notifyItemMoved(dc.getOldIndex(), dc.getNewIndex());
+                                    }
                                     break;
                                 case REMOVED:
                                     Log.d(TAG, "Removed city: " + dc.getDocument().getData());
+                                    mTripsArrayList.remove(dc.getOldIndex());
+                                    tripsListAdapter.notifyItemRemoved(dc.getOldIndex());
                                     break;
                             }
                         }

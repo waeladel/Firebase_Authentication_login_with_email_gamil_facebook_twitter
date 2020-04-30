@@ -1,21 +1,17 @@
 package com.getin.car.activities;
 
-import android.app.Dialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Looper;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +19,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -35,16 +30,12 @@ import com.directions.route.Route;
 import com.directions.route.RouteException;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
-import com.getin.car.Manifest;
 import com.getin.car.R;
 import com.getin.car.authentication.PolyUtil;
-import com.getin.car.fragments.EditProfileFragment;
 import com.getin.car.fragments.TripInfoFragment;
 import com.getin.car.fragments.TripRulesFragment;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.ErrorDialogFragment;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -56,7 +47,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.location.places.Place;
@@ -79,7 +69,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.FragmentManager;
 
 
 import org.json.JSONException;
@@ -88,7 +78,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.FragmentManager.POP_BACK_STACK_INCLUSIVE;
 import static com.getin.car.activities.BaseActivity.trip;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 

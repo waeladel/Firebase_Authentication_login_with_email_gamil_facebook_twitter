@@ -1,8 +1,7 @@
 package com.getin.car;
 
-import android.app.Application;
 import android.content.Context;
-import android.support.multidex.MultiDexApplication;
+import androidx.multidex.MultiDexApplication;
 
 /**
  * Created on 25/03/2017.

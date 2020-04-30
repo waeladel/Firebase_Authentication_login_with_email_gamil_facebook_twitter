@@ -8,7 +8,7 @@ import java.util.Locale;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.format.DateFormat;
 import com.getin.car.R;
 

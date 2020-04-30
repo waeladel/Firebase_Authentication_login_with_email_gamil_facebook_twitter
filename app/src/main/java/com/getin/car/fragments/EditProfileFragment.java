@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -506,7 +505,7 @@ public class EditProfileFragment extends Fragment {
                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                            Log.d(TAG, "uploadFromUri:onSuccess");
                            // Get a URL to the uploaded content
-                           Uri downloadUri = taskSnapshot.getDownloadUrl();
+                           Uri downloadUri = taskSnapshot.getUploadSessionUri();
                            Log.d(TAG, "downloadUrl on uploadAvatar= "+ downloadUri);
                            submitProfile(downloadUri);
                         /*if(downloadUrl != null){
